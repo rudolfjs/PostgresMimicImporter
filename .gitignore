@@ -1,0 +1,14 @@
+## DATA FOLDER ##
+data/
+!data/README.md
+
+## bin ##
+bin/notes.md
+
+## PYTHON ##
+__pycache__/*
+*/__pycache__/*
+__pycache__
+
+## JetBrains ##
+.idea/*

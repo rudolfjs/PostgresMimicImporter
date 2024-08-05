@@ -1,0 +1,66 @@
+{
+    "database": {
+        "type": "postgresql+asyncpg",
+        "host": "pg",
+        "port": 5432,
+        "database": "postgres",
+        "schema": "public"
+    },
+
+    "data": {
+        "location": "./data/mimiciv",
+        "version": "2.2",
+        "schemas": [
+            "mimic_hosp",
+            "mimic_icu",
+            "mimiciv_ed",
+            "mimic_derived"
+        ],
+        "tables": {
+            "mimic_hosp": [
+                "admissions",
+                "d_hcpcs",
+                "diagnoses_icd",
+                "d_icd_diagnoses",
+                "d_icd_procedures",
+                "d_labitems",
+                "emar_detail",
+                "emar",
+                "hcpcsevents",
+                "labevents",
+                "microbiologyevents",
+                "omr",
+                "patients",
+                "pharmacy",
+                "poe_detail",
+                "poe",
+                "prescriptions",
+                "procedures_icd",
+                "transfers"
+            ],
+            "mimic_icu": [
+                "chartevents",
+                "datetimeevents",
+                "d_items",
+                "icustays",
+                "ingredientevents",
+                "inputevents",
+                "outputevents",
+                "procedureevents"
+            ],
+            "mimiciv_ed": [
+                "diagnosis",
+                "edstays",
+                "medrecon",
+                "pyxis",
+                "triage",
+                "vitalsign"
+            ],
+            "mimic_derived": {
+                "demographics": [
+                    "age"
+                ]
+            }
+        }
+    }
+}
