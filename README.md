@@ -88,6 +88,38 @@ The service can be started and stopped after being built:
 2. Stop the service: `docker-compose down`
 3. Stop the service and remove data: `docker-compose down -v`
 
+## Running with Podman
+
+The compose file is compatible with `podman compose` and `podman-compose`. Bind-mount volumes carry the `:z` SELinux shared-relabel suffix (and `:ro` where appropriate). On hosts where SELinux is not enforcing — Docker Desktop, macOS, Windows, non-SELinux Linux — the suffix is ignored. On SELinux-enabled hosts (RHEL, Fedora, Rocky, Alma) both Docker and Podman honour `:z`, relabelling the host path to a shared `container_file_t` label so the data is reachable from multiple containers (an analytics container, another importer, etc.) without each one being locked to a private category set.
+
+```bash
+podman-compose build
+podman-compose up -d
+```
+
+### Pre-pull the Postgres image
+
+Podman's default `short-name-mode = "enforcing"` cannot resolve `postgres:14.0-alpine` non-interactively. Pull it with the fully-qualified name before bringing the stack up:
+
+```bash
+podman pull docker.io/library/postgres:14.0-alpine
+```
+
+### Rootless healthchecks need user systemd
+
+Rootless Podman registers container healthchecks as user systemd timers. If your user systemd is unhealthy you will see:
+
+```
+create healthcheck: unable to get systemd connection to add healthchecks:
+  dial unix /run/user/<uid>/systemd/private: connect: connection refused
+```
+
+Re-execute user systemd to refresh the socket:
+
+```bash
+systemctl --user daemon-reexec
+```
+
 ## Development
 
 The Python environment is managed with [pixi](https://pixi.sh). The manifest lives in

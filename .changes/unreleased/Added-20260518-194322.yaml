@@ -1,0 +1,3 @@
+kind: Added
+body: 'Podman / podman-compose support: bind mounts now carry the `:z` SELinux shared-relabel suffix (and `:ro` for `config.json`), ignored on non-SELinux hosts and honoured by both Docker and Podman on SELinux-enabled hosts. README documents pre-pull and user-systemd notes for rootless Podman.'
+time: 2026-05-18T19:43:22.858932806+10:00
