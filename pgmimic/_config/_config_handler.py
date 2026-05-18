@@ -4,6 +4,7 @@ import os
 
 class ConfigHandler:
     def __init__(self, location: str = None) -> None:
+        self.config = None
         try:
             with open(location) as config_file:
                 self.config = json.load(config_file)
