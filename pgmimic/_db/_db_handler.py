@@ -1,5 +1,6 @@
-import psycopg2
 import subprocess
+
+import psycopg2
 
 
 class DataHandler:
@@ -140,7 +141,7 @@ class DataHandler:
         print(output)
         return None
     
-    def _write_mimic_data(self, files: list = None) -> None:
+    def _write_mimic_data(self, files: list) -> None:
         # TODO - need to progress here
         psql_template = 'psql "postgresql://{}:{}@{}:{}/{}" --command "{}"'
         for schema in self.config["data"]["schemas"]:

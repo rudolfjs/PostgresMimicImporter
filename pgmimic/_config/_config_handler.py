@@ -3,7 +3,7 @@ import os
 
 
 class ConfigHandler:
-    def __init__(self, location: str = None) -> None:
+    def __init__(self, location: str) -> None:
         try:
             with open(location) as config_file:
                 self.config = json.load(config_file)
@@ -15,5 +15,5 @@ class ConfigHandler:
             print(repr(e))
         return None
 
-    def get_config(self) -> json:
+    def get_config(self) -> dict:
         return self.config

@@ -1,0 +1,3 @@
+kind: Added
+body: New `ruff` lint and format tasks via `pixi run -e dev lint|format` (#1)
+time: 2026-05-18T19:25:09.668269961+10:00

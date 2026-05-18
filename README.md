@@ -1,8 +1,9 @@
 # Postgres MIMIC Importer
 
 <a href="/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/MIT-purple?style=for-the-badge&label=LICENSE"></a>
-<a href="https://www.python.org/downloads/"><img alt="Python Version: 3.8plus" src="https://img.shields.io/badge/3.10-green?style=for-the-badge&label=Python&logo=python"></a>
-<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/black-black?style=for-the-badge&label=Code%20Style"></a>
+<a href="https://www.python.org/downloads/"><img alt="Python Version: 3.10" src="https://img.shields.io/badge/3.10-green?style=for-the-badge&label=Python&logo=python"></a>
+<a href="https://pixi.sh"><img alt="Env manager: pixi" src="https://img.shields.io/badge/pixi-yellow?style=for-the-badge&label=Env&logo=pixi"></a>
+<a href="https://docs.astral.sh/ruff/"><img alt="Code style: ruff" src="https://img.shields.io/badge/ruff-black?style=for-the-badge&label=Code%20Style"></a>
 
 ****
 
@@ -86,6 +87,25 @@ The service can be started and stopped after being built:
     * Start the service as a background daemon: `docker-compose up -d`
 2. Stop the service: `docker-compose down`
 3. Stop the service and remove data: `docker-compose down -v`
+
+## Development
+
+The Python environment is managed with [pixi](https://pixi.sh). The manifest lives in
+`pyproject.toml` and the lockfile (`pixi.lock`) is committed for reproducibility.
+
+```bash
+# Install the default (runtime) environment
+pixi install
+
+# Run the importer locally (expects ./config.json and ./data/...)
+pixi run mimic-import
+
+# Dev tasks (available in the `dev` environment)
+pixi run -e dev lint        # ruff check
+pixi run -e dev format      # ruff format
+pixi run -e dev test        # pytest
+pixi run -e dev typecheck   # ty check
+```
 
 ## License
 ```license

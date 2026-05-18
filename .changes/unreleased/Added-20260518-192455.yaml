@@ -1,0 +1,3 @@
+kind: Added
+body: New `ty` type-check task via `pixi run -e dev typecheck`
+time: 2026-05-18T19:24:55.180150744+10:00

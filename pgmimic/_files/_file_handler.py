@@ -5,14 +5,14 @@ class FileHandler:
     def __init__(self) -> None:
         return None
 
-    def path(self, path: str = None) -> None:
+    def path(self, path: str) -> None:
         """
         Set the file path for data
         Args:
             path (str): System path for file location
         """
-        self.path = path
-        if self._exists(self.path) is False:
+        self._path = path
+        if self._exists(self._path) is False:
             raise FileNotFoundError
         return None
 
@@ -27,5 +27,5 @@ class FileHandler:
             return False
 
     def files(self) -> list:
-        files = glob.glob(self.path + "/**/*.csv.gz", recursive=True)
+        files = glob.glob(self._path + "/**/*.csv.gz", recursive=True)
         return files
