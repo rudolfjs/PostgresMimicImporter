@@ -16,3 +16,13 @@ __pycache__
 ## pixi environments ##
 .pixi/*
 !.pixi/config.toml
+
+## direnv ##
+.direnv/
+.envrc.local
+
+## worktrees ##
+.worktrees/
+
+## devcontainer local overrides ##
+.devcontainer/.env

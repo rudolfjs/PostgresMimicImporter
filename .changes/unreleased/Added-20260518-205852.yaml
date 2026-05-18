@@ -1,0 +1,3 @@
+kind: Added
+body: '`.devcontainer/` (compose-based, Postgres 14 alongside) and committed `.envrc` (`pixi shell-hook --environment dev` via direnv) for one-command IDE / Codespaces / direnv onboarding. `.gitignore` covers `.direnv/`, `.envrc.local`, `.worktrees/`, and `.devcontainer/.env`.'
+time: 2026-05-18T20:58:52+10:00

@@ -1,0 +1,33 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sleep infinity
+    working_dir: /workspace
+    volumes:
+      - ..:/workspace:cached
+    environment:
+      - DB_USER=${POSTGRES_USER:-dev}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-dev}
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      pg:
+        condition: service_healthy
+
+  pg:
+    image: postgres:14.0-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-dev}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-dev}
+      - POSTGRES_DB=${POSTGRES_DB:-mimiciv}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER:-dev}"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    volumes:
+      - pgmimic-devcontainer-db:/var/lib/postgresql/data/
+
+volumes:
+  pgmimic-devcontainer-db:
