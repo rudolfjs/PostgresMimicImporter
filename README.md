@@ -90,7 +90,7 @@ The service can be started and stopped after being built:
 
 ## Running with Podman
 
-The compose file is compatible with `podman compose` and `podman-compose`. Bind-mount volumes carry the `:Z` SELinux relabel suffix, which is a no-op on Docker but required on SELinux-enabled hosts (RHEL, Fedora, Rocky, Alma).
+The compose file is compatible with `podman compose` and `podman-compose`. Bind-mount volumes carry the `:z` SELinux shared-relabel suffix (and `:ro` where appropriate). On hosts where SELinux is not enforcing — Docker Desktop, macOS, Windows, non-SELinux Linux — the suffix is ignored. On SELinux-enabled hosts (RHEL, Fedora, Rocky, Alma) both Docker and Podman honour `:z`, relabelling the host path to a shared `container_file_t` label so the data is reachable from multiple containers (an analytics container, another importer, etc.) without each one being locked to a private category set.
 
 ```bash
 podman-compose build
