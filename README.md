@@ -107,6 +107,16 @@ pixi run -e dev test        # pytest
 pixi run -e dev typecheck   # ty check
 ```
 
+### Local-run prerequisites
+
+`pixi run mimic-import` shells out to `psql` and `gzip` while loading data, so a
+direct local run needs both on `PATH`. The conda-forge `postgresql` package
+bundles a full server (~400 MB) and there is no client-only variant, so pixi
+intentionally does not pin them — install via your system package manager (e.g.
+`apt install postgresql-client`, `brew install libpq`). The Docker workflow
+already installs `postgresql-client` in `mimic_import.dockerfile`, so the
+container path needs nothing extra.
+
 ## License
 ```license
 MIT License

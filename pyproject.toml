@@ -62,9 +62,16 @@ addopts = "-ra"
 
 [tool.ty.environment]
 python-version = "3.10"
+extra-paths = ["pgmimic"]
 
 [tool.ty.src]
 include = ["pgmimic/**/*.py", "tests/**/*.py"]
 
-[tool.ty.rules]
+# Scope the unresolved-import escape hatch to the single file that imports
+# psycopg2 — conda-forge ships no stubs and we don't want to weaken import
+# checking across the rest of the codebase.
+[[tool.ty.overrides]]
+include = ["pgmimic/_db/_db_handler.py"]
+
+[tool.ty.overrides.rules]
 unresolved-import = "ignore"

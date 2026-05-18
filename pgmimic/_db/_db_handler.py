@@ -1,9 +1,12 @@
 import subprocess
+from pathlib import Path
 
 import psycopg2
 
 
 class DataHandler:
+    SQL_DIR = (Path(__file__).parent / "SQL").resolve()
+
     def __init__(self, config):
         self.config = config
         self._connect()
@@ -57,7 +60,8 @@ class DataHandler:
 
     def _create_constraint(self):
         curr = self.conn.cursor()
-        with open(f"_db/SQL/{self.config['data']['version']}/constraint.sql") as sql_file:
+        sql_path = self.SQL_DIR / self.config["data"]["version"] / "constraint.sql"
+        with open(sql_path) as sql_file:
             sql = sql_file.read()
             for statement in sql.split(";"):
                 curr = self.conn.cursor()
@@ -79,7 +83,8 @@ class DataHandler:
 
     def _create_index(self):
         curr = self.conn.cursor()
-        with open(f"_db/SQL/{self.config['data']['version']}/index.sql") as sql_file:
+        sql_path = self.SQL_DIR / self.config["data"]["version"] / "index.sql"
+        with open(sql_path) as sql_file:
             sql = sql_file.read()
             for statement in sql.split(";"):
                 curr = self.conn.cursor()
@@ -101,7 +106,8 @@ class DataHandler:
     
     def _create_tables(self):
         curr = self.conn.cursor()
-        with open(f"_db/SQL/{self.config['data']['version']}/create.sql") as sql_file:
+        sql_path = self.SQL_DIR / self.config["data"]["version"] / "create.sql"
+        with open(sql_path) as sql_file:
             sql = sql_file.read()
             for statement in sql.split(";"):
                 curr = self.conn.cursor()
@@ -122,9 +128,9 @@ class DataHandler:
         return None
     
     def _create_postgres_functions(self):
-        file_path = f"{self.config['data']['version']}/postgres-functions.sql"
+        sql_path = self.SQL_DIR / self.config["data"]["version"] / "postgres-functions.sql"
         psql_template = 'psql "postgresql://{}:{}@{}:{}/{}" --command "{}"'
-        command = f"\i _db/SQL/{file_path}"
+        command = f"\\i {sql_path}"
         bash_command = psql_template.format(
                     self.config["database"]["username"],
                     self.config["database"]["password"],
@@ -141,7 +147,7 @@ class DataHandler:
         print(output)
         return None
     
-    def _write_mimic_data(self, files: list) -> None:
+    def _write_mimic_data(self, files: list[str]) -> None:
         # TODO - need to progress here
         psql_template = 'psql "postgresql://{}:{}@{}:{}/{}" --command "{}"'
         for schema in self.config["data"]["schemas"]:
@@ -149,9 +155,12 @@ class DataHandler:
                 pass
             else:
                 for table in self.config["data"]["tables"][schema]:
-                    file_path = [s for s in files if table in s][0]
-                    command = f"\copy {schema}.{table} FROM PROGRAM 'gzip -dc \
-                        {file_path} ' DELIMITER ',' CSV HEADER NULL ''"
+                    file_path = next(s for s in files if table in s)
+                    command = (
+                        f"\\copy {schema}.{table} FROM PROGRAM "
+                        f"'gzip -dc {file_path}' "
+                        f"DELIMITER ',' CSV HEADER NULL ''"
+                    )
                     bash_command = psql_template.format(
                         self.config["database"]["username"],
                         self.config["database"]["password"],
