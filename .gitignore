@@ -12,3 +12,7 @@ __pycache__
 
 ## JetBrains ##
 .idea/*
+
+## pixi environments ##
+.pixi/*
+!.pixi/config.toml

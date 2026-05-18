@@ -15,7 +15,8 @@ When [submitting a pull request](https://github.com/rudolfjs/PostgresMimicImport
 
 1. You clearly describe the problem you're solving or the feature you're adding, linking to [issue](https://github.com/rudolfjs/PostgresMimicImporter/issues).
 2. You outline the changes you've made in detail.
-3. Please make sure your code is formatted using [psf/black](https://github.com/psf/black)
+3. Please make sure your code is linted and formatted using [ruff](https://docs.astral.sh/ruff/) — run `pixi run -e dev lint` and `pixi run -e dev format` before pushing
+4. Please ensure `pixi run -e dev test` and `pixi run -e dev typecheck` (powered by [ty](https://docs.astral.sh/ty/)) pass on your branch
 
 ## Review Process
 

@@ -1,0 +1,77 @@
+[project]
+name = "pgmimic"
+description = "MIMIC data importer for PostgreSQL"
+authors = [{name = "Rudolf J", email = "r.schnetler@uq.edu.au"}]
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">= 3.10"
+version = "0.0.4"
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
+
+[tool.pixi.dependencies]
+python = "3.10.*"
+psycopg2 = "2.9.*"
+
+[tool.pixi.feature.lint.dependencies]
+ruff = ">=0.15"
+
+[tool.pixi.feature.test.dependencies]
+pytest = ">=8"
+
+[tool.pixi.feature.types.dependencies]
+ty = ">=0.0.37"
+
+[tool.pixi.environments]
+default = {solve-group = "default"}
+dev = {features = ["lint", "test", "types"], solve-group = "default"}
+lint = {features = ["lint"], solve-group = "default"}
+test = {features = ["test"], solve-group = "default"}
+types = {features = ["types"], solve-group = "default"}
+
+[tool.pixi.tasks]
+mimic-import = {cmd = "python pgmimic/main.py", description = "Run the MIMIC importer"}
+
+[tool.pixi.feature.lint.tasks]
+lint = {cmd = "ruff check .", description = "Lint with ruff"}
+format = {cmd = "ruff format .", description = "Format with ruff"}
+check-format = {cmd = "ruff format --check .", description = "Check formatting without changes"}
+
+[tool.pixi.feature.test.tasks]
+test = {cmd = "pytest", description = "Run the pytest suite"}
+
+[tool.pixi.feature.types.tasks]
+typecheck = {cmd = "ty check", description = "Type-check with ty"}
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["pgmimic"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["pgmimic"]
+addopts = "-ra"
+
+[tool.ty.environment]
+python-version = "3.10"
+extra-paths = ["pgmimic"]
+
+[tool.ty.src]
+include = ["pgmimic/**/*.py", "tests/**/*.py"]
+
+# Scope the unresolved-import escape hatch to the single file that imports
+# psycopg2 — conda-forge ships no stubs and we don't want to weaken import
+# checking across the rest of the codebase.
+[[tool.ty.overrides]]
+include = ["pgmimic/_db/_db_handler.py"]
+
+[tool.ty.overrides.rules]
+unresolved-import = "ignore"

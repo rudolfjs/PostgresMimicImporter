@@ -1,6 +1,6 @@
 from _config._config_handler import ConfigHandler
-from _files._file_handler import FileHandler
 from _db._db_handler import DataHandler
+from _files._file_handler import FileHandler
 
 
 class MimicImporter:

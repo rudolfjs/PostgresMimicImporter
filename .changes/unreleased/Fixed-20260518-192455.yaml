@@ -1,0 +1,3 @@
+kind: Fixed
+body: Fixes shadowed `path` attribute on `FileHandler` and stray `None`-default annotations across handlers
+time: 2026-05-18T19:24:55.192656325+10:00

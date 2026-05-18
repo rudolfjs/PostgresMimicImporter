@@ -1,0 +1,3 @@
+kind: Added
+body: New `pytest` smoke test suite — `pixi run -e dev test` imports every module
+time: 2026-05-18T19:25:10.776129219+10:00

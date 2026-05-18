@@ -1,0 +1,3 @@
+kind: Changed
+body: Switches Python env management to `pixi` (#1) — `pyproject.toml` + `pixi.lock` replace `requirements.txt`
+time: 2026-05-18T19:24:55.166550705+10:00
