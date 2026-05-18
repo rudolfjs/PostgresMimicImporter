@@ -41,8 +41,8 @@ services:
     links:
       - pg
     volumes:
-     - ${MIMIC_DATA_PATH}:/usr/src/app/data
-     - ./config.json:/usr/src/app/config.json
+     - ${MIMIC_DATA_PATH}:/usr/src/app/data:Z
+     - ./config.json:/usr/src/app/config.json:Z
     deploy:
       resources:
         limits:
