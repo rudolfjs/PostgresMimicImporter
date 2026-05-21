@@ -4,7 +4,7 @@
   "service": "app",
   "workspaceFolder": "/workspace",
   "shutdownAction": "stopCompose",
-  "postCreateCommand": "pixi install -e dev",
+  "postCreateCommand": "pixi install -e dev --locked",
   "customizations": {
     "vscode": {
       "extensions": [
