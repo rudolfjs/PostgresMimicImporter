@@ -9,6 +9,13 @@ Thank you for your interest in our little project. I appreciate any support to h
 3. Make your changes in the new branch.
 4. Submit a [pull request (PR)](https://github.com/rudolfjs/PostgresMimicImporter/pull/new/master) to the main repository.
 
+## Development environment
+
+Pick whichever fits your setup — both run the same `pixi` tasks:
+
+- **Devcontainer** — open the repo in VS Code, JetBrains Gateway, or GitHub Codespaces and choose *Reopen in Container*. The config in `.devcontainer/` builds a pixi-based image with `postgresql-client` and brings up Postgres 14 alongside, so the `dev` pixi env is ready and the importer can run end-to-end without any local Python or DB install.
+- **Local pixi (+ direnv)** — install [pixi](https://pixi.sh); the committed `.envrc` auto-activates the `dev` env if you also use [direnv](https://direnv.net) (run `direnv allow` once after cloning). Without direnv, prefix dev commands with `pixi run -e dev`.
+
 ## Pull Request Guidelines
 
 When [submitting a pull request](https://github.com/rudolfjs/PostgresMimicImporter/pull/new/master) please ensure that:
