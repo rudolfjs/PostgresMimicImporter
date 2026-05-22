@@ -127,5 +127,43 @@ jobs:
     if: "!endsWith(github.actor, '[bot]')"
 
     steps:
-      - name: Placeholder
-        run: echo "build-publish job — fleshed out in Task 8"
+      - name: Check out code at updated tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          pixi-version: latest
+          cache: true
+          environments: release
+
+      - name: Build sdist + wheel
+        run: |
+          rm -rf dist/
+          pixi run -e release build-dist
+
+      - name: Generate checksums
+        run: |
+          cd dist
+          sha256sum *.tar.gz *.whl > checksums.txt
+          cat checksums.txt
+
+      - name: Prepare release notes
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#v}"
+          cp ".changes/${version}.md" release-notes.md
+          cat release-notes.md
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          body_path: release-notes.md
+          files: |
+            dist/*.tar.gz
+            dist/*.whl
+            dist/checksums.txt
