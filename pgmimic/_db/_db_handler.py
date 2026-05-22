@@ -2,24 +2,24 @@ import subprocess
 from pathlib import Path
 
 import psycopg2
+from _config.models import Config
 
 
 class DataHandler:
     SQL_DIR = (Path(__file__).parent / "SQL").resolve()
 
-    def __init__(self, config):
+    def __init__(self, config: Config) -> None:
         self.config = config
         self._connect()
-        return None
 
     def _connect(self) -> None:
         try:
             self.conn = psycopg2.connect(
-                user=self.config["database"]["username"],
-                password=self.config["database"]["password"],
-                host=self.config["database"]["host"],
-                port=self.config["database"]["port"],
-                database=self.config["database"]["database"],
+                user=self.config.database.username,
+                password=self.config.database.password,
+                host=self.config.database.host,
+                port=self.config.database.port,
+                database=self.config.database.database,
             )
             return self.conn
         except ConnectionError as ce:
@@ -33,10 +33,10 @@ class DataHandler:
         # not just that fact that the table exists.
         table_e_list = []
         exists = False
-        db = self.config["database"]["database"]
+        db = self.config.database.database
         curr = self.conn.cursor()
-        for schema in self.config["data"]["schemas"]:
-            for table in self.config["data"]["tables"][schema]:
+        for schema in self.config.data.schemas:
+            for table in self.config.data.tables[schema]:
                 sql = f"""
                     SELECT EXISTS(SELECT 1 FROM information_schema.tables
                     WHERE table_catalog='{db}' AND
@@ -60,7 +60,7 @@ class DataHandler:
 
     def _create_constraint(self):
         curr = self.conn.cursor()
-        sql_path = self.SQL_DIR / self.config["data"]["version"] / "constraint.sql"
+        sql_path = self.SQL_DIR / self.config.data.version / "constraint.sql"
         with open(sql_path) as sql_file:
             sql = sql_file.read()
             for statement in sql.split(";"):
@@ -83,7 +83,7 @@ class DataHandler:
 
     def _create_index(self):
         curr = self.conn.cursor()
-        sql_path = self.SQL_DIR / self.config["data"]["version"] / "index.sql"
+        sql_path = self.SQL_DIR / self.config.data.version / "index.sql"
         with open(sql_path) as sql_file:
             sql = sql_file.read()
             for statement in sql.split(";"):
@@ -106,7 +106,7 @@ class DataHandler:
 
     def _create_tables(self):
         curr = self.conn.cursor()
-        sql_path = self.SQL_DIR / self.config["data"]["version"] / "create.sql"
+        sql_path = self.SQL_DIR / self.config.data.version / "create.sql"
         with open(sql_path) as sql_file:
             sql = sql_file.read()
             for statement in sql.split(";"):
@@ -128,15 +128,15 @@ class DataHandler:
         return None
 
     def _create_postgres_functions(self):
-        sql_path = self.SQL_DIR / self.config["data"]["version"] / "postgres-functions.sql"
+        sql_path = self.SQL_DIR / self.config.data.version / "postgres-functions.sql"
         psql_template = 'psql "postgresql://{}:{}@{}:{}/{}" --command "{}"'
         command = f"\\i {sql_path}"
         bash_command = psql_template.format(
-            self.config["database"]["username"],
-            self.config["database"]["password"],
-            self.config["database"]["host"],
-            self.config["database"]["port"],
-            self.config["database"]["database"],
+            self.config.database.username,
+            self.config.database.password,
+            self.config.database.host,
+            self.config.database.port,
+            self.config.database.database,
             command.strip(),
         )
         print(bash_command)
@@ -148,11 +148,11 @@ class DataHandler:
     def _write_mimic_data(self, files: list[str]) -> None:
         # TODO - need to progress here
         psql_template = 'psql "postgresql://{}:{}@{}:{}/{}" --command "{}"'
-        for schema in self.config["data"]["schemas"]:
+        for schema in self.config.data.schemas:
             if schema == "mimic_derived":
                 pass
             else:
-                for table in self.config["data"]["tables"][schema]:
+                for table in self.config.data.tables[schema]:
                     file_path = next(s for s in files if table in s)
                     command = (
                         f"\\copy {schema}.{table} FROM PROGRAM "
@@ -160,11 +160,11 @@ class DataHandler:
                         f"DELIMITER ',' CSV HEADER NULL ''"
                     )
                     bash_command = psql_template.format(
-                        self.config["database"]["username"],
-                        self.config["database"]["password"],
-                        self.config["database"]["host"],
-                        self.config["database"]["port"],
-                        self.config["database"]["database"],
+                        self.config.database.username,
+                        self.config.database.password,
+                        self.config.database.host,
+                        self.config.database.port,
+                        self.config.database.database,
                         command.strip(),
                     )
                     print(bash_command)

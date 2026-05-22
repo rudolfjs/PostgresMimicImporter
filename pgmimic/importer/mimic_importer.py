@@ -36,7 +36,7 @@ class MimicImporter:
             self._file_handler = FileHandler()
             try:
                 self.file_path = self._file_handler.path(
-                    f"{self.config['data']['location']}/{self.config['data']['version']}"
+                    f"{self.config.data.location}/{self.config.data.version}"
                 )
             except Exception as e:
                 print(f"FATAL: Error finding files in path. Error Message: {repr(e)}")
