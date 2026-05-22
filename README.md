@@ -3,7 +3,7 @@
 <a href="/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/MIT-purple?style=for-the-badge&label=LICENSE"></a>
 <a href="https://www.python.org/downloads/"><img alt="Python Version: 3.10" src="https://img.shields.io/badge/3.10-green?style=for-the-badge&label=Python&logo=python"></a>
 <a href="https://pixi.sh"><img alt="Env manager: pixi" src="https://img.shields.io/badge/pixi-yellow?style=for-the-badge&label=Env&logo=pixi"></a>
-<a href="https://docs.astral.sh/ruff/"><img alt="Code style: ruff" src="https://img.shields.io/badge/ruff-black?style=for-the-badge&label=Code%20Style"></a>
+<a href="https://docs.astral.sh/ruff/"><img alt="Code style: ruff" src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&style=for-the-badge"></a>
 
 ****
 
