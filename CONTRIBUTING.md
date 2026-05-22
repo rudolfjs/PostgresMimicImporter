@@ -32,3 +32,33 @@ Once you've submitted a pull request:
 1. The project maintainers will review your changes.
 2. Maintainers may ask for additional changes or clarifications.
 3. Once approved, your contribution will be merged into the project.
+
+## Releasing
+
+Releases are driven by tag pushes matching `v*` — the `.github/workflows/release.yml` workflow handles changelog batching, building artifacts, and publishing the GitHub release.
+
+### One-time setup
+
+The workflow authenticates as a dedicated GitHub App to push the changelog commit and force-move the release tag (the default `GITHUB_TOKEN` cannot push to a branch-protected `main`). Maintainers need:
+
+1. A GitHub App installed on the repo with `contents: write`.
+2. Repo variable `RELEASE_APP_ID` set to the App ID.
+3. Repo secret `RELEASE_APP_PRIVATE_KEY` set to the App's private key (`.pem` contents).
+4. If `main` has branch protection or `refs/tags/v*` has tag protection, the App must be in the bypass list — otherwise the changelog push and the tag force-move will be rejected.
+
+### Cutting a release
+
+1. Add changie fragments for everything new since the last release: `pixi run -e dev changie new` (or run `changie new` directly if you have it on `PATH`). Commit them.
+2. Bump `version` in `pyproject.toml` to the target version. Commit.
+3. Tag and push: `git tag v<VERSION> && git push origin v<VERSION>`.
+4. The release workflow will:
+   - Verify the tag points to a commit on `main`.
+   - Verify the tag matches `pyproject.toml`'s version.
+   - Run lint, format check, typecheck, and tests.
+   - Batch the unreleased fragments into `.changes/<VERSION>.md` and rebuild `CHANGELOG.md`.
+   - Commit the changelog update back to `main` and force-move the tag to include that commit.
+   - Build sdist + wheel, generate sha256 checksums, and create a GitHub release with the `.changes/<VERSION>.md` body and the dist files attached.
+
+### Re-running a failed release
+
+If the workflow fails mid-flight (e.g. tests broke), fix the issue on a PR, merge to `main`, and re-tag. If the changelog has already been batched (i.e. `.changes/<VERSION>.md` exists), the workflow will detect "existing" mode and skip the batch step.
