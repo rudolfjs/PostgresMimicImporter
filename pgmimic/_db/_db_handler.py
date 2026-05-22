@@ -1,3 +1,4 @@
+import os
 import subprocess
 from pathlib import Path
 
@@ -104,49 +105,41 @@ class DataHandler:
     def _create_tables(self) -> None:
         self._run_sql_file_via_split("create.sql")
 
-    def _create_postgres_functions(self):
-        sql_path = self.SQL_DIR / self.config.data.version / "postgres-functions.sql"
-        psql_template = 'psql "postgresql://{}:{}@{}:{}/{}" --command "{}"'
-        command = f"\\i {sql_path}"
-        bash_command = psql_template.format(
-            self.config.database.username,
-            self.config.database.password,
+    def _psql_args(self, command: str) -> list[str]:
+        """Build the psql argv list. Credentials go via env, not the URL."""
+        return [
+            "psql",
+            "-h",
             self.config.database.host,
-            self.config.database.port,
+            "-p",
+            str(self.config.database.port),
+            "-U",
+            self.config.database.username or "",
+            "-d",
             self.config.database.database,
-            command.strip(),
-        )
-        print(bash_command)
-        process = subprocess.Popen(bash_command, stdout=subprocess.PIPE, shell=True)
-        output, error = process.communicate()
-        print(output)
-        return None
+            "-c",
+            command,
+        ]
+
+    def _psql_env(self) -> dict[str, str]:
+        """Inject `PGPASSWORD` so the password never appears in argv or process listing."""
+        return {**os.environ, "PGPASSWORD": self.config.database.password or ""}
+
+    def _create_postgres_functions(self) -> None:
+        sql_path = self.SQL_DIR / self.config.data.version / "postgres-functions.sql"
+        args = self._psql_args(f"\\i {sql_path}")
+        subprocess.run(args, env=self._psql_env(), check=True)
 
     def _write_mimic_data(self, files: list[str]) -> None:
-        # TODO - need to progress here
-        psql_template = 'psql "postgresql://{}:{}@{}:{}/{}" --command "{}"'
         for schema in self.config.data.schemas:
             if schema == "mimic_derived":
-                pass
-            else:
-                for table in self.config.data.tables[schema]:
-                    file_path = _file_for_table(files, table)
-                    command = (
-                        f"\\copy {schema}.{table} FROM PROGRAM "
-                        f"'gzip -dc {file_path}' "
-                        f"DELIMITER ',' CSV HEADER NULL ''"
-                    )
-                    bash_command = psql_template.format(
-                        self.config.database.username,
-                        self.config.database.password,
-                        self.config.database.host,
-                        self.config.database.port,
-                        self.config.database.database,
-                        command.strip(),
-                    )
-                    print(bash_command)
-                    process = subprocess.Popen(bash_command, stdout=subprocess.PIPE, shell=True)
-                    output, error = process.communicate()
-                    print(output)
-
-        return None
+                continue
+            for table in self.config.data.tables[schema]:
+                file_path = _file_for_table(files, table)
+                command = (
+                    f"\\copy {schema}.{table} FROM PROGRAM "
+                    f"'gzip -dc {file_path}' "
+                    f"DELIMITER ',' CSV HEADER NULL ''"
+                )
+                args = self._psql_args(command)
+                subprocess.run(args, env=self._psql_env(), check=True)

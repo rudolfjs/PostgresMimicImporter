@@ -1,0 +1,3 @@
+kind: Security
+body: '`psql` subprocess calls in `_create_postgres_functions` and `_write_mimic_data` no longer interpolate credentials into a shell command. Password is passed via `PGPASSWORD` env; host/port/user/db go through `psql`''s `-h` / `-p` / `-U` / `-d` flags. `subprocess.run(..., shell=False, check=True)` replaces the previous `Popen(..., shell=True)`. Passwords containing shell metacharacters (single quotes, semicolons, `$`, backticks) no longer corrupt the command or risk arbitrary shell execution.'
+time: 2026-05-22T22:01:29.000000000+10:00
