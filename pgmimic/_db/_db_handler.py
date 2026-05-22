@@ -5,6 +5,23 @@ import psycopg2
 from _config.models import Config
 
 
+def _file_for_table(files: list[str], table: str) -> str:
+    """Return the single CSV file in ``files`` whose basename is ``{table}.csv.gz``.
+
+    Replaces the original substring match (``table in s``) which would silently
+    pick the wrong file when one table name is a prefix of another — notably
+    ``poe`` matching ``poe_detail.csv.gz`` first. Basename equality is exact and
+    unambiguous; duplicates or absences raise instead of being papered over.
+    """
+    target = f"{table}.csv.gz"
+    matches = [s for s in files if Path(s).name == target]
+    if not matches:
+        raise FileNotFoundError(f"No CSV found for table {table!r}")
+    if len(matches) > 1:
+        raise RuntimeError(f"Multiple CSVs found for table {table!r}: {matches}")
+    return matches[0]
+
+
 class DataHandler:
     SQL_DIR = (Path(__file__).parent / "SQL").resolve()
 
@@ -153,7 +170,7 @@ class DataHandler:
                 pass
             else:
                 for table in self.config.data.tables[schema]:
-                    file_path = next(s for s in files if table in s)
+                    file_path = _file_for_table(files, table)
                     command = (
                         f"\\copy {schema}.{table} FROM PROGRAM "
                         f"'gzip -dc {file_path}' "
