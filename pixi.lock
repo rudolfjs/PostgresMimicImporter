@@ -129,6 +129,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/keyutils-1.6.3-hb9d3cd8_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/krb5-1.22.2-ha1258a1_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/ld_impl_linux-64-2.45.1-default_hbd61a6d_102.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/lefthook-2.1.8-hfc2019e_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libedit-3.1.20250104-pl5321h7949ede_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libexpat-2.8.0-hecca717_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libffi-3.5.2-h3435931_0.conda
@@ -174,6 +175,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/icu-78.3-h25d91c4_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/iniconfig-2.3.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/krb5-1.22.2-h207b36a_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/lefthook-2.1.8-h5839d16_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libcxx-22.1.5-h19cb2f5_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libedit-3.1.20250104-pl5321ha958ccf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libexpat-2.8.0-hcc62823_0.conda
@@ -212,6 +214,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/icu-78.3-hef89b57_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/iniconfig-2.3.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/krb5-1.22.2-h385eeb1_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/lefthook-2.1.8-hf76c51c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libcxx-22.1.5-h55c6f16_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libedit-3.1.20250104-pl5321hafb1f1b_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libexpat-2.8.0-hf6b4638_0.conda
@@ -249,6 +252,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/icu-78.3-h637d24d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/iniconfig-2.3.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/krb5-1.22.2-h0ea6238_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/lefthook-2.1.8-h11686cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libexpat-2.8.0-hac47afa_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libffi-3.5.2-h3d046cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/liblzma-5.8.3-hfd05255_0.conda
@@ -928,6 +932,36 @@ packages:
   license_family: GPL
   size: 728002
   timestamp: 1774197446916
+- conda: https://conda.anaconda.org/conda-forge/linux-64/lefthook-2.1.8-hfc2019e_0.conda
+  sha256: 598c18cc302de8973f637a1cb273122c5e3c88cb39f66c03720e1b217c69e3f7
+  md5: 26235d00ca904142881ba8717ba0e9de
+  license: MIT
+  license_family: MIT
+  size: 5500420
+  timestamp: 1779205099808
+- conda: https://conda.anaconda.org/conda-forge/osx-64/lefthook-2.1.8-h5839d16_0.conda
+  sha256: 22712052e11e1fe7665721eb34cf5113128e9410414dada300bd9ba92df1c944
+  md5: a10fe5009f049f64cf676d7b92100bd9
+  constrains:
+  - __osx >=10.12
+  license: MIT
+  license_family: MIT
+  size: 5533862
+  timestamp: 1779205160900
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/lefthook-2.1.8-hf76c51c_0.conda
+  sha256: d42c202238e5fd3e3d9b93f2a4606dea3fc73f20c2ccd66653b1935444fa6dc1
+  md5: c646a915f71fc706c3b5d10fb7a21aeb
+  license: MIT
+  license_family: MIT
+  size: 4943219
+  timestamp: 1779205209733
+- conda: https://conda.anaconda.org/conda-forge/win-64/lefthook-2.1.8-h11686cb_0.conda
+  sha256: e318d7f5a16bef18e7957b3d1010732d0172315ea00cfc223370f62704f5b54d
+  md5: db6096104bb2fdea99395f1c9f968648
+  license: MIT
+  license_family: MIT
+  size: 5435940
+  timestamp: 1779205128532
 - conda: https://conda.anaconda.org/conda-forge/osx-64/libcxx-22.1.5-h19cb2f5_1.conda
   sha256: 8f3d495df4427d9285ae25a51d32123ca251c32abebcef020fddb8ac1f200894
   md5: 56fa8b3e43d26c97da88aea4e958f616

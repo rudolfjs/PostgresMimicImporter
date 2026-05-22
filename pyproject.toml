@@ -26,7 +26,7 @@ ty = ">=0.0.37"
 
 [tool.pixi.environments]
 default = {solve-group = "default"}
-dev = {features = ["lint", "test", "types"], solve-group = "default"}
+dev = {features = ["lint", "test", "types", "dev"], solve-group = "default"}
 lint = {features = ["lint"], solve-group = "default"}
 test = {features = ["test"], solve-group = "default"}
 types = {features = ["types"], solve-group = "default"}
@@ -44,6 +44,12 @@ test = {cmd = "pytest", description = "Run the pytest suite"}
 
 [tool.pixi.feature.types.tasks]
 typecheck = {cmd = "ty check", description = "Type-check with ty"}
+
+[tool.pixi.feature.dev.dependencies]
+lefthook = "*"
+
+[tool.pixi.feature.dev.tasks]
+install-hooks = {cmd = "lefthook install", description = "Install lefthook git hooks (one-time per clone)"}
 
 [tool.ruff]
 line-length = 100

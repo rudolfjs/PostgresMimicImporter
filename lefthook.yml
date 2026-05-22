@@ -1,0 +1,15 @@
+# Local git hooks for pgmimic contributors.
+# Install once per clone:  pixi run -e dev install-hooks
+# Bypass an individual push: git push --no-verify  (use sparingly)
+
+pre-push:
+  parallel: true
+  commands:
+    lint:
+      run: pixi run -e dev lint
+    check-format:
+      run: pixi run -e dev check-format
+    typecheck:
+      run: pixi run -e dev typecheck
+    test:
+      run: pixi run -e dev test
