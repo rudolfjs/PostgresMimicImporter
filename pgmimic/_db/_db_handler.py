@@ -75,74 +75,34 @@ class DataHandler:
 
         return exists
 
-    def _create_constraint(self):
-        curr = self.conn.cursor()
-        sql_path = self.SQL_DIR / self.config.data.version / "constraint.sql"
-        with open(sql_path) as sql_file:
-            sql = sql_file.read()
-            for statement in sql.split(";"):
-                curr = self.conn.cursor()
-                if len(statement) < 1:
-                    pass
-                else:
-                    try:
-                        curr.execute(statement)
-                        self.conn.commit()
-                    except Exception as e:
-                        print(f"FATAL: Error creating tables. {repr(e)}")
-                try:
-                    self.conn.commit()
-                except Exception as e:
-                    self.conn.rollback()
-                    print(f"FATAL: Error creating tables. {repr(e)}")
-                curr.close()
-        return None
+    def _run_sql_file_via_split(self, filename: str) -> None:
+        """Execute every non-empty `;`-separated statement in a versioned SQL file.
 
-    def _create_index(self):
-        curr = self.conn.cursor()
-        sql_path = self.SQL_DIR / self.config.data.version / "index.sql"
-        with open(sql_path) as sql_file:
-            sql = sql_file.read()
-            for statement in sql.split(";"):
-                curr = self.conn.cursor()
-                if len(statement) < 1:
-                    pass
-                else:
-                    try:
-                        curr.execute(statement)
-                        self.conn.commit()
-                    except Exception as e:
-                        print(f"FATAL: Error creating tables. {repr(e)}")
-                try:
-                    self.conn.commit()
-                except Exception as e:
-                    self.conn.rollback()
-                    print(f"FATAL: Error creating tables. {repr(e)}")
-                curr.close()
-        return None
+        On any error: rollback the transaction and re-raise. The previous
+        implementation caught `Exception`, printed `repr(e)`, and carried on —
+        leaving a half-populated database that the next run skipped because
+        `_check_data` saw the partial tables as "data already imported".
+        """
+        sql_path = self.SQL_DIR / self.config.data.version / filename
+        sql = sql_path.read_text()
+        try:
+            with self.conn.cursor() as cur:
+                for statement in sql.split(";"):
+                    if statement.strip():
+                        cur.execute(statement)
+            self.conn.commit()
+        except Exception:
+            self.conn.rollback()
+            raise
 
-    def _create_tables(self):
-        curr = self.conn.cursor()
-        sql_path = self.SQL_DIR / self.config.data.version / "create.sql"
-        with open(sql_path) as sql_file:
-            sql = sql_file.read()
-            for statement in sql.split(";"):
-                curr = self.conn.cursor()
-                if len(statement) < 1:
-                    pass
-                else:
-                    try:
-                        curr.execute(statement)
-                        self.conn.commit()
-                    except Exception as e:
-                        print(f"FATAL: Error creating tables. {repr(e)}")
-                try:
-                    self.conn.commit()
-                except Exception as e:
-                    self.conn.rollback()
-                    print(f"FATAL: Error creating tables. {repr(e)}")
-                curr.close()
-        return None
+    def _create_constraint(self) -> None:
+        self._run_sql_file_via_split("constraint.sql")
+
+    def _create_index(self) -> None:
+        self._run_sql_file_via_split("index.sql")
+
+    def _create_tables(self) -> None:
+        self._run_sql_file_via_split("create.sql")
 
     def _create_postgres_functions(self):
         sql_path = self.SQL_DIR / self.config.data.version / "postgres-functions.sql"
