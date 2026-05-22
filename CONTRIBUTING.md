@@ -26,6 +26,8 @@ pixi run -e dev install-hooks
 
 This installs [lefthook](https://lefthook.dev) git hooks. On `git push` they run the same fast suite CI runs (`lint`, `check-format`, `typecheck`, `test`) in parallel. Bypass an individual push with `git push --no-verify` — use sparingly.
 
+`lefthook install` bakes the absolute path of the dev-env lefthook binary into `.git/hooks/pre-push`, so pushes work without `pixi shell` active. If you rebuild the pixi env (e.g. wipe `.pixi/` or change platforms), re-run `pixi run -e dev install-hooks` so the embedded path stays valid.
+
 ## Pull Request Guidelines
 
 When [submitting a pull request](https://github.com/rudolfjs/PostgresMimicImporter/pull/new/master) please ensure that:
