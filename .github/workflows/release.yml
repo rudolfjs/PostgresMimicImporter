@@ -39,6 +39,35 @@ jobs:
             exit 1
           fi
 
+      - name: Detect changelog state
+        id: changelog
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#v}"
+          if [ -f ".changes/${version}.md" ]; then
+            echo "mode=existing" >> "$GITHUB_OUTPUT"
+            echo "Release notes already exist at .changes/${version}.md"
+          elif [ -n "$(ls .changes/unreleased/ 2>/dev/null | grep -v .gitkeep)" ]; then
+            echo "mode=batch" >> "$GITHUB_OUTPUT"
+            echo "Unreleased fragments found — will batch"
+          else
+            echo "::error::No release notes and no unreleased changelog entries. Nothing to release."
+            exit 1
+          fi
+
+      - name: Verify pyproject.toml version matches tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#v}"
+          pyproject_version=$(python3 -c "import tomllib, pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")
+          if [ "$version" != "$pyproject_version" ]; then
+            echo "::error::Tag ${TAG} does not match pyproject.toml version ${pyproject_version}. Bump pyproject.toml first."
+            exit 1
+          fi
+          echo "Version match: ${pyproject_version}"
+
   build-publish:
     name: Build and publish
     runs-on: ubuntu-24.04
