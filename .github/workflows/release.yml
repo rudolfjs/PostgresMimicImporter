@@ -15,8 +15,29 @@ jobs:
     if: "!endsWith(github.actor, '[bot]')"
 
     steps:
-      - name: Placeholder
-        run: echo "release job — fleshed out in Tasks 4–7"
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+
+      - name: Check out code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Verify tag points to a commit on main
+        env:
+          SHA: ${{ github.sha }}
+        run: |
+          git fetch origin main
+          if ! git merge-base --is-ancestor "$SHA" origin/main; then
+            echo "::error::Release tags must point to commits already on main."
+            exit 1
+          fi
 
   build-publish:
     name: Build and publish
