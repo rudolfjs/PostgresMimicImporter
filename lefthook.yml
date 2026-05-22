@@ -13,3 +13,5 @@ pre-push:
       run: pixi run -e dev typecheck
     test:
       run: pixi run -e dev test
+    validate-fixtures:
+      run: pixi run -e dev validate-fixtures

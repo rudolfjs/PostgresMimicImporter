@@ -42,12 +42,16 @@ check-format = {cmd = "ruff format --check .", description = "Check formatting w
 
 [tool.pixi.feature.test.tasks]
 test = {cmd = "pytest", description = "Run the pytest suite"}
+validate-fixtures = {cmd = "python -m tests.fixtures.validate", description = "Pandera-validate synthetic CSV fixtures"}
+generate-fixtures = {cmd = "python -m tests.fixtures.generate", description = "Regenerate synthetic CSV fixtures (run when schemas change)"}
 
 [tool.pixi.feature.types.tasks]
 typecheck = {cmd = "ty check", description = "Type-check with ty"}
 
 [tool.pixi.feature.dev.dependencies]
 lefthook = "*"
+pandera = ">=0.20"
+pandas = ">=2"
 
 [tool.pixi.feature.dev.tasks]
 install-hooks = {cmd = "lefthook install", description = "Install lefthook git hooks (one-time per clone)"}
