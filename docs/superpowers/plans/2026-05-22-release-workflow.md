@@ -237,7 +237,7 @@ permissions:
 jobs:
   release:
     name: Prepare release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: "!endsWith(github.actor, '[bot]')"
 
     steps:
@@ -246,7 +246,7 @@ jobs:
 
   build-publish:
     name: Build and publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: release
     if: "!endsWith(github.actor, '[bot]')"
 
@@ -259,7 +259,7 @@ jobs:
 
 Run:
 ```bash
-python -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml'))"
+python3 -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml'))"
 ```
 Expected: no output, exit code 0.
 
@@ -312,7 +312,7 @@ In `.github/workflows/release.yml`, replace the `release.steps:` content (curren
 
 Run:
 ```bash
-python -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml'))"
+python3 -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml'))"
 ```
 Expected: no output, exit code 0.
 
@@ -359,7 +359,7 @@ git commit -m "Wire up app token, checkout, and tag-on-main check in release job
           TAG: ${{ github.ref_name }}
         run: |
           version="${TAG#v}"
-          pyproject_version=$(python -c "import tomllib, pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")
+          pyproject_version=$(python3 -c "import tomllib, pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")
           if [ "$version" != "$pyproject_version" ]; then
             echo "::error::Tag ${TAG} does not match pyproject.toml version ${pyproject_version}. Bump pyproject.toml first."
             exit 1
@@ -371,7 +371,7 @@ git commit -m "Wire up app token, checkout, and tag-on-main check in release job
 
 Run:
 ```bash
-python -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml'))"
+python3 -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml'))"
 ```
 Expected: no output, exit code 0.
 
@@ -421,7 +421,7 @@ git commit -m "Detect changelog state and verify pyproject version matches tag"
 
 Run:
 ```bash
-python -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml'))"
+python3 -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml'))"
 ```
 Expected: no output, exit code 0.
 
@@ -481,7 +481,7 @@ git commit -m "Add pixi setup and verification matrix (lint/typecheck/test/build
 
 Run:
 ```bash
-python -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml'))"
+python3 -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml'))"
 ```
 Expected: no output, exit code 0.
 
@@ -549,7 +549,7 @@ git commit -m "Batch changelog, commit to main, and force-move release tag"
 
 Run:
 ```bash
-python -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml'))"
+python3 -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml'))"
 ```
 Expected: no output, exit code 0.
 
@@ -623,10 +623,10 @@ grep -c "endsWith(github.actor, '\[bot\]')" .github/workflows/release.yml
 ```
 Expected: `2` (one per job).
 
-- [ ] **Step 3: Confirm both jobs run on `ubuntu-latest`**
+- [ ] **Step 3: Confirm both jobs run on `ubuntu-24.04`**
 
 ```bash
-grep -c "ubuntu-latest" .github/workflows/release.yml
+grep -c "ubuntu-24.04" .github/workflows/release.yml
 ```
 Expected: `2`.
 
