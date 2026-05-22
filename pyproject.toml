@@ -31,12 +31,17 @@ pytest = ">=8"
 [tool.pixi.feature.types.dependencies]
 ty = ">=0.0.37"
 
+[tool.pixi.feature.release.dependencies]
+python-build = ">=1.2"
+hatchling = ">=1.25"
+
 [tool.pixi.environments]
 default = {solve-group = "default"}
 dev = {features = ["lint", "test", "types"], solve-group = "default"}
 lint = {features = ["lint"], solve-group = "default"}
 test = {features = ["test"], solve-group = "default"}
 types = {features = ["types"], solve-group = "default"}
+release = {features = ["release"], solve-group = "default"}
 
 [tool.pixi.tasks]
 mimic-import = {cmd = "python pgmimic/main.py", description = "Run the MIMIC importer"}
@@ -51,6 +56,9 @@ test = {cmd = "pytest", description = "Run the pytest suite"}
 
 [tool.pixi.feature.types.tasks]
 typecheck = {cmd = "ty check", description = "Type-check with ty"}
+
+[tool.pixi.feature.release.tasks]
+build-dist = {cmd = "python -m build --no-isolation --sdist --wheel --outdir dist", description = "Build sdist + wheel into ./dist (uses pixi-pinned hatchling, no PyPI fetch)"}
 
 [tool.ruff]
 line-length = 100
