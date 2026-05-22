@@ -1,0 +1,29 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Prepare release
+    runs-on: ubuntu-24.04
+    if: "!endsWith(github.actor, '[bot]')"
+
+    steps:
+      - name: Placeholder
+        run: echo "release job — fleshed out in Tasks 4–7"
+
+  build-publish:
+    name: Build and publish
+    runs-on: ubuntu-24.04
+    needs: release
+    if: "!endsWith(github.actor, '[bot]')"
+
+    steps:
+      - name: Placeholder
+        run: echo "build-publish job — fleshed out in Task 8"
