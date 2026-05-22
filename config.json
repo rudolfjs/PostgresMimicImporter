@@ -61,6 +61,66 @@
                     "age"
                 ]
             }
+        },
+        "versions": {
+            "3.1": {
+                "schemas": [
+                    "mimiciv_hosp",
+                    "mimiciv_icu",
+                    "mimiciv_ed",
+                    "mimiciv_derived"
+                ],
+                "tables": {
+                    "mimiciv_hosp": [
+                        "admissions",
+                        "d_hcpcs",
+                        "diagnoses_icd",
+                        "d_icd_diagnoses",
+                        "d_icd_procedures",
+                        "d_labitems",
+                        "drgcodes",
+                        "emar_detail",
+                        "emar",
+                        "hcpcsevents",
+                        "labevents",
+                        "microbiologyevents",
+                        "omr",
+                        "patients",
+                        "pharmacy",
+                        "poe_detail",
+                        "poe",
+                        "prescriptions",
+                        "procedures_icd",
+                        "provider",
+                        "services",
+                        "transfers"
+                    ],
+                    "mimiciv_icu": [
+                        "caregiver",
+                        "chartevents",
+                        "datetimeevents",
+                        "d_items",
+                        "icustays",
+                        "ingredientevents",
+                        "inputevents",
+                        "outputevents",
+                        "procedureevents"
+                    ],
+                    "mimiciv_ed": [
+                        "diagnosis",
+                        "edstays",
+                        "medrecon",
+                        "pyxis",
+                        "triage",
+                        "vitalsign"
+                    ],
+                    "mimiciv_derived": {
+                        "demographics": [
+                            "age"
+                        ]
+                    }
+                }
+            }
         }
     }
 }
