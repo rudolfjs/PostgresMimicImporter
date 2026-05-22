@@ -68,6 +68,24 @@ jobs:
           fi
           echo "Version match: ${pyproject_version}"
 
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          pixi-version: latest
+          cache: true
+          environments: dev release
+
+      - name: Run release verification checks
+        run: |
+          pixi run -e dev check-format
+          pixi run -e dev lint
+          pixi run -e dev typecheck
+          pixi run -e dev test
+          pixi run -e release build-dist
+          test -n "$(ls dist/pgmimic-*.tar.gz 2>/dev/null)" || { echo "::error::missing sdist in dist/"; exit 1; }
+          test -n "$(ls dist/pgmimic-*.whl 2>/dev/null)" || { echo "::error::missing wheel in dist/"; exit 1; }
+          ls dist/
+
   build-publish:
     name: Build and publish
     runs-on: ubuntu-24.04
