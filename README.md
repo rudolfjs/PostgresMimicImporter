@@ -174,10 +174,15 @@ export MIMIC_DATA_PATH=/absolute/path/to/mimic/data
 pixi run -e dev e2e
 ```
 
-The task brings up the Postgres compose service, runs `pixi run mimic-import`,
-then connects via `psycopg2` and runs `mimiciv3.1/buildmimic/validate.sql`,
-reporting per-table expected-vs-actual row counts. Pass `--teardown` to drop the
-container afterwards, or `--skip-import` to re-validate against an
+The task brings up the Postgres compose service, runs the importer **inside**
+the `mimic_import` compose container (so the `${MIMIC_DATA_PATH}` bind-mount
+and the `pg` hostname both resolve — neither works from the host shell), then
+connects to the published `localhost:5432` via `psycopg2` and runs
+`mimiciv3.1/buildmimic/validate.sql`, reporting per-table expected-vs-observed
+row counts. The host-side `psycopg2` connect reads `POSTGRES_USER` /
+`POSTGRES_PASSWORD` / `POSTGRES_DB` from `.env` if the shell hasn't exported
+them, matching compose's own substitution behaviour. Pass `--teardown` to drop
+the container afterwards, or `--skip-import` to re-validate against an
 already-loaded DB. The PR template's middle checkbox refers to this task.
 
 ### Local-run prerequisites

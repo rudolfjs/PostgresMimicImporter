@@ -11,12 +11,19 @@ What it does:
   2. Picks `podman-compose` if available, else `docker compose`.
   3. Brings up the `pg` service from `docker-compose.yaml` and polls
      until `pg_isready`.
-  4. Runs the importer via `<runtime> run --rm mimic_import` so the
-     container has the `MIMIC_DATA_PATH` bind-mount and can reach the
-     `pg` hostname on the compose network (the host shell cannot).
+  4. Runs the importer via `<runtime> run --rm --build mimic_import`
+     so the container has the `MIMIC_DATA_PATH` bind-mount and can
+     reach the `pg` hostname on the compose network (the host shell
+     cannot). `--build` rebuilds the image when the Dockerfile or
+     pixi manifest changes; `.dockerignore` keeps `data/` out of the
+     build context.
   5. Connects to localhost:5432 via psycopg2 (postgres' published
-     port) and runs `mimiciv3.1/buildmimic/validate.sql`. Reports per
-     table; exits non-zero on any FAILED row.
+     port) using the same `POSTGRES_USER`/`POSTGRES_PASSWORD`/
+     `POSTGRES_DB` values compose substitutes into the `pg` container
+     (read from `.env` if the shell hasn't exported them, matching
+     compose's own behaviour), and runs `mimiciv3.1/buildmimic/
+     validate.sql`. Reports per table; exits non-zero on any FAILED
+     row.
 
 The container is left running by default (so you can poke around).
 Pass `--teardown` to bring it back down.
@@ -37,6 +44,28 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent.parent
 VALIDATE_SQL = REPO_ROOT / "mimiciv3.1" / "buildmimic" / "validate.sql"
+ENV_FILE = REPO_ROOT / ".env"
+
+
+def _dotenv_defaults() -> dict[str, str]:
+    """Parse the tracked .env the same way docker-compose does.
+
+    Compose reads `.env` to substitute `${POSTGRES_USER}` etc. into
+    the `pg` container's environment. Our host-side psycopg2 connect
+    needs the same values — but `os.environ` only sees them if the
+    shell exported them. Read `.env` ourselves so a bare
+    `MIMIC_DATA_PATH=... pixi run -e dev e2e` still works.
+    """
+    out: dict[str, str] = {}
+    if not ENV_FILE.is_file():
+        return out
+    for line in ENV_FILE.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        out[key.strip()] = value.strip().strip('"').strip("'")
+    return out
 
 
 def _pick_runtime() -> list[str]:
@@ -97,12 +126,13 @@ def _run_validate_sql() -> int:
         )
         return 1
 
+    env = _dotenv_defaults()
     conn = psycopg2.connect(
         host="localhost",
         port=5432,
-        dbname=os.getenv("POSTGRES_DB", "postgres"),
-        user=os.getenv("POSTGRES_USER", "postgres"),
-        password=os.getenv("POSTGRES_PASSWORD", ""),
+        dbname=os.getenv("POSTGRES_DB", env.get("POSTGRES_DB", "postgres")),
+        user=os.getenv("POSTGRES_USER", env.get("POSTGRES_USER", "postgres")),
+        password=os.getenv("POSTGRES_PASSWORD", env.get("POSTGRES_PASSWORD", "")),
     )
     try:
         with conn.cursor() as cur:
