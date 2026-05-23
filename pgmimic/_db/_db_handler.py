@@ -122,24 +122,25 @@ class DataHandler:
         self._run_sql_file("create.sql")
 
     def _psql_args(self, command: str) -> list[str]:
-        """Build the psql argv list. Credentials go via env, not the URL."""
-        return [
+        """Build the psql argv list. Password goes via PGPASSWORD env."""
+        args = [
             "psql",
             "-h",
             self.config.database.host,
             "-p",
             str(self.config.database.port),
-            "-U",
-            self.config.database.username or "",
-            "-d",
-            self.config.database.database,
-            "-c",
-            command,
         ]
+        if self.config.database.username is not None:
+            args += ["-U", self.config.database.username]
+        args += ["-d", self.config.database.database, "-c", command]
+        return args
 
     def _psql_env(self) -> dict[str, str]:
-        """Inject `PGPASSWORD` so the password never appears in argv or process listing."""
-        return {**os.environ, "PGPASSWORD": self.config.database.password or ""}
+        """Inject PGPASSWORD/PGUSER so credentials never appear in argv."""
+        env = {**os.environ, "PGPASSWORD": self.config.database.password or ""}
+        if self.config.database.username is not None:
+            env["PGUSER"] = self.config.database.username
+        return env
 
     def _create_postgres_functions(self) -> None:
         sql_path = self.SQL_DIR / self.config.data.version / "postgres-functions.sql"

@@ -65,6 +65,32 @@ def test_config_populates_credentials_from_env(minimal_config_dict, monkeypatch)
     assert cfg.database.password == "s3cret"
 
 
+def test_config_empty_env_user_does_not_override(minimal_config_dict, monkeypatch):
+    """An exported-but-empty DB_USER (e.g. `export DB_USER=`) must not
+    overwrite a config-supplied username with an empty string — that
+    would cause `psql -U ""` → `FATAL: role "" does not exist`."""
+    monkeypatch.setenv("DB_USER", "")
+    monkeypatch.setenv("DB_PASSWORD", "")
+    from _config.models import Config
+
+    minimal_config_dict["database"]["username"] = "alice"
+    minimal_config_dict["database"]["password"] = "secret"
+    cfg = Config.model_validate(minimal_config_dict)
+    assert cfg.database.username == "alice"
+    assert cfg.database.password == "secret"
+
+
+def test_config_no_env_preserves_none(minimal_config_dict, monkeypatch):
+    """When env vars are absent, credentials stay None (config default)."""
+    monkeypatch.delenv("DB_USER", raising=False)
+    monkeypatch.delenv("DB_PASSWORD", raising=False)
+    from _config.models import Config
+
+    cfg = Config.model_validate(minimal_config_dict)
+    assert cfg.database.username is None
+    assert cfg.database.password is None
+
+
 def test_config_handler_returns_model(tmp_path, minimal_config_dict, monkeypatch):
     monkeypatch.delenv("DB_USER", raising=False)
     monkeypatch.delenv("DB_PASSWORD", raising=False)

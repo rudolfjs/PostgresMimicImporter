@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from typing import TypeAlias
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -19,7 +20,7 @@ class DatabaseConfig(BaseModel):
     password: str | None = None
 
 
-TableMap = dict[str, "list[str] | dict[str, list[str]]"]
+TableMap: TypeAlias = dict[str, list[str] | dict[str, list[str]]]
 
 
 class VersionedAssets(BaseModel):
@@ -59,8 +60,8 @@ class Config(BaseModel):
 
     @model_validator(mode="after")
     def _populate_credentials_from_env(self) -> Config:
-        env_user = os.getenv("DB_USER")
-        env_password = os.getenv("DB_PASSWORD")
+        env_user = os.getenv("DB_USER") or None
+        env_password = os.getenv("DB_PASSWORD") or None
         if env_user is not None:
             self.database.username = env_user
         if env_password is not None:

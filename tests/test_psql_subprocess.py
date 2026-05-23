@@ -124,3 +124,55 @@ def test_psql_subprocess_includes_connection_flags(fake_db):
     assert argv[argv.index("-U") + 1] == "alice"
     assert "-d" in argv
     assert argv[argv.index("-d") + 1] == "postgres"
+
+
+def test_psql_omits_user_flag_when_username_is_none(tmp_path, monkeypatch):
+    """When username is None, -U must be omitted so psql falls back to
+    libpq defaults (PGUSER env or OS user). Passing `-U ""` causes
+    `FATAL: role "" does not exist`."""
+    from _db import _db_handler as db_mod
+
+    mock_conn = MagicMock(name="conn")
+    monkeypatch.setattr(db_mod.psycopg2, "connect", lambda **_: mock_conn)
+    monkeypatch.setattr(db_mod.DataHandler, "SQL_DIR", tmp_path)
+
+    (tmp_path / "2.2").mkdir()
+    (tmp_path / "2.2" / "postgres-functions.sql").write_text("-- noop")
+
+    mock_run = MagicMock(name="subprocess.run")
+    mock_run.return_value = MagicMock(returncode=0)
+    monkeypatch.setattr(db_mod.subprocess, "run", mock_run)
+
+    cfg = _make_config()
+    # username stays None (no DB_USER env set)
+    assert cfg.database.username is None
+    handler = db_mod.DataHandler(cfg)
+    handler._create_postgres_functions()
+
+    argv = mock_run.call_args.args[0]
+    assert "-U" not in argv, f"-U must not appear when username is None, got {argv}"
+
+
+def test_psql_sets_pguser_env_when_username_is_set(tmp_path, monkeypatch):
+    """When username is set, pass it via PGUSER env (mirrors PGPASSWORD pattern)."""
+    from _db import _db_handler as db_mod
+
+    mock_conn = MagicMock(name="conn")
+    monkeypatch.setattr(db_mod.psycopg2, "connect", lambda **_: mock_conn)
+    monkeypatch.setattr(db_mod.DataHandler, "SQL_DIR", tmp_path)
+
+    (tmp_path / "2.2").mkdir()
+    (tmp_path / "2.2" / "postgres-functions.sql").write_text("-- noop")
+
+    mock_run = MagicMock(name="subprocess.run")
+    mock_run.return_value = MagicMock(returncode=0)
+    monkeypatch.setattr(db_mod.subprocess, "run", mock_run)
+
+    cfg = _make_config()
+    cfg.database.username = "alice"
+    cfg.database.password = "secret"
+    handler = db_mod.DataHandler(cfg)
+    handler._create_postgres_functions()
+
+    env = mock_run.call_args.kwargs["env"]
+    assert env.get("PGUSER") == "alice"
