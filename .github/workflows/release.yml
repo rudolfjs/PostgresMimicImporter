@@ -8,6 +8,14 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash --noprofile --norc -euo pipefail {0}
+
 jobs:
   release:
     name: Prepare release
@@ -29,13 +37,14 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Verify tag points to a commit on main
+      - name: Verify tag points to the current tip of main
         env:
           SHA: ${{ github.sha }}
         run: |
           git fetch origin main
-          if ! git merge-base --is-ancestor "$SHA" origin/main; then
-            echo "::error::Release tags must point to commits already on main."
+          main_sha=$(git rev-parse origin/main)
+          if [ "$SHA" != "$main_sha" ]; then
+            echo "::error::Release tag must point to the current tip of main ($main_sha), but got $SHA. Push tags only on the tip of main so the post-batch push is fast-forward."
             exit 1
           fi
 
@@ -48,11 +57,18 @@ jobs:
           if [ -f ".changes/${version}.md" ]; then
             echo "mode=existing" >> "$GITHUB_OUTPUT"
             echo "Release notes already exist at .changes/${version}.md"
-          elif [ -n "$(ls .changes/unreleased/ 2>/dev/null | grep -v .gitkeep)" ]; then
+            exit 0
+          fi
+          if [ ! -d ".changes/unreleased" ]; then
+            echo "::error::No release notes at .changes/${version}.md and .changes/unreleased/ directory is missing. Initialise changie before releasing."
+            exit 1
+          fi
+          fragment=$(find .changes/unreleased -maxdepth 1 -type f ! -name '.gitkeep' -print -quit)
+          if [ -n "$fragment" ]; then
             echo "mode=batch" >> "$GITHUB_OUTPUT"
             echo "Unreleased fragments found — will batch"
           else
-            echo "::error::No release notes and no unreleased changelog entries. Nothing to release."
+            echo "::error::No release notes at .changes/${version}.md and no unreleased changelog entries in .changes/unreleased/. Nothing to release."
             exit 1
           fi
 
