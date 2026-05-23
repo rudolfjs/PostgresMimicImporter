@@ -46,6 +46,17 @@ class DataHandler:
     def _close(self) -> None:
         self.conn.close()
 
+    def _data_schemas(self) -> list[str]:
+        """Schemas whose `tables` entry is a `list[str]` of CSV-backed tables.
+
+        Schemas whose entry is a `dict` (e.g. `mimic_derived` in 2.x or
+        `mimiciv_derived` in 3.1) hold SQL-function outputs — there are no
+        CSVs to COPY for them, and no rows to assert in `_check_data`. The
+        previous implementation hardcoded the schema *name*, which broke
+        silently when 3.1 renamed `mimic_derived` to `mimiciv_derived`.
+        """
+        return [s for s in self.config.data.schemas if isinstance(self.config.data.tables[s], list)]
+
     def _check_data(self) -> bool:
         # TODO - needs to change to check data in table,
         # not just that fact that the table exists.
@@ -53,7 +64,7 @@ class DataHandler:
         exists = False
         db = self.config.database.database
         curr = self.conn.cursor()
-        for schema in self.config.data.schemas:
+        for schema in self._data_schemas():
             for table in self.config.data.tables[schema]:
                 sql = f"""
                     SELECT EXISTS(SELECT 1 FROM information_schema.tables
@@ -131,9 +142,7 @@ class DataHandler:
         subprocess.run(args, env=self._psql_env(), check=True)
 
     def _write_mimic_data(self, files: list[str]) -> None:
-        for schema in self.config.data.schemas:
-            if schema == "mimic_derived":
-                continue
+        for schema in self._data_schemas():
             for table in self.config.data.tables[schema]:
                 file_path = _file_for_table(files, table)
                 command = (
