@@ -31,7 +31,7 @@ def test_legacy_shape_still_works(base_config, monkeypatch):
     """Config without `versions` map continues to use top-level schemas/tables."""
     monkeypatch.delenv("DB_USER", raising=False)
     monkeypatch.delenv("DB_PASSWORD", raising=False)
-    from _config.models import Config
+    from pgmimic._config.models import Config
 
     cfg = Config.model_validate(base_config)
     assert cfg.data.schemas == ["mimic_hosp"]
@@ -42,7 +42,7 @@ def test_versions_map_takes_precedence(base_config, monkeypatch):
     """When `versions[version]` is present, its schemas/tables override top-level."""
     monkeypatch.delenv("DB_USER", raising=False)
     monkeypatch.delenv("DB_PASSWORD", raising=False)
-    from _config.models import Config
+    from pgmimic._config.models import Config
 
     cfg_dict = dict(base_config)
     cfg_dict["data"] = dict(cfg_dict["data"])
@@ -67,7 +67,7 @@ def test_versions_miss_falls_back_to_legacy(base_config, monkeypatch):
     """If `versions[version]` is absent but `versions` itself exists, legacy keys win."""
     monkeypatch.delenv("DB_USER", raising=False)
     monkeypatch.delenv("DB_PASSWORD", raising=False)
-    from _config.models import Config
+    from pgmimic._config.models import Config
 
     cfg_dict = dict(base_config)
     cfg_dict["data"] = dict(cfg_dict["data"])
@@ -88,7 +88,7 @@ def test_both_versions_resolve_in_same_config(base_config, monkeypatch):
     """A config with both 2.2 and 3.1 in `versions` resolves correctly by selecting `version`."""
     monkeypatch.delenv("DB_USER", raising=False)
     monkeypatch.delenv("DB_PASSWORD", raising=False)
-    from _config.models import Config
+    from pgmimic._config.models import Config
 
     versions_map = {
         "2.2": {

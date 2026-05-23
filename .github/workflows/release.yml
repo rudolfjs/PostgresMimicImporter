@@ -1,0 +1,185 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash --noprofile --norc -euo pipefail {0}
+
+jobs:
+  release:
+    name: Prepare release
+    runs-on: ubuntu-24.04
+    if: "!endsWith(github.actor, '[bot]')"
+
+    steps:
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+
+      - name: Check out code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Verify tag points to the current tip of main
+        env:
+          SHA: ${{ github.sha }}
+        run: |
+          git fetch origin main
+          main_sha=$(git rev-parse origin/main)
+          if [ "$SHA" != "$main_sha" ]; then
+            echo "::error::Release tag must point to the current tip of main ($main_sha), but got $SHA. Push tags only on the tip of main so the post-batch push is fast-forward."
+            exit 1
+          fi
+
+      - name: Detect changelog state
+        id: changelog
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#v}"
+          if [ -f ".changes/${version}.md" ]; then
+            echo "mode=existing" >> "$GITHUB_OUTPUT"
+            echo "Release notes already exist at .changes/${version}.md"
+            exit 0
+          fi
+          if [ ! -d ".changes/unreleased" ]; then
+            echo "::error::No release notes at .changes/${version}.md and .changes/unreleased/ directory is missing. Initialise changie before releasing."
+            exit 1
+          fi
+          fragment=$(find .changes/unreleased -maxdepth 1 -type f ! -name '.gitkeep' -print -quit)
+          if [ -n "$fragment" ]; then
+            echo "mode=batch" >> "$GITHUB_OUTPUT"
+            echo "Unreleased fragments found — will batch"
+          else
+            echo "::error::No release notes at .changes/${version}.md and no unreleased changelog entries in .changes/unreleased/. Nothing to release."
+            exit 1
+          fi
+
+      - name: Verify pyproject.toml version matches tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#v}"
+          pyproject_version=$(python3 -c "import tomllib, pathlib; print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])")
+          if [ "$version" != "$pyproject_version" ]; then
+            echo "::error::Tag ${TAG} does not match pyproject.toml version ${pyproject_version}. Bump pyproject.toml first."
+            exit 1
+          fi
+          echo "Version match: ${pyproject_version}"
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          pixi-version: latest
+          cache: true
+          environments: dev release
+
+      - name: Run release verification checks
+        run: |
+          pixi run -e dev check-format
+          pixi run -e dev lint
+          pixi run -e dev typecheck
+          pixi run -e dev test
+          pixi run -e release build-dist
+          test -n "$(ls dist/pgmimic-*.tar.gz 2>/dev/null)" || { echo "::error::missing sdist in dist/"; exit 1; }
+          test -n "$(ls dist/pgmimic-*.whl 2>/dev/null)" || { echo "::error::missing wheel in dist/"; exit 1; }
+          ls dist/
+
+      - name: Install changie
+        if: steps.changelog.outputs.mode == 'batch'
+        uses: miniscruff/changie-action@v3
+        with:
+          version: latest
+
+      - name: Batch and merge changelog
+        if: steps.changelog.outputs.mode == 'batch'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#v}"
+          changie batch "$version"
+          changie merge
+
+      - name: Commit changelog updates
+        if: steps.changelog.outputs.mode == 'batch'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .changes/ CHANGELOG.md
+          git commit -m "chore: update changelog for ${TAG}"
+          git push origin HEAD:main
+
+      - name: Move tag to include changelog commit
+        if: steps.changelog.outputs.mode == 'batch'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          git tag -f "$TAG"
+          git push origin "$TAG" --force
+
+  build-publish:
+    name: Build and publish
+    runs-on: ubuntu-24.04
+    needs: release
+    if: "!endsWith(github.actor, '[bot]')"
+
+    steps:
+      - name: Check out code at updated tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          pixi-version: latest
+          cache: true
+          environments: release
+
+      - name: Build sdist + wheel
+        run: |
+          rm -rf dist/
+          pixi run -e release build-dist
+
+      - name: Generate checksums
+        run: |
+          cd dist
+          sha256sum *.tar.gz *.whl > checksums.txt
+          cat checksums.txt
+
+      - name: Prepare release notes
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#v}"
+          cp ".changes/${version}.md" release-notes.md
+          cat release-notes.md
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          body_path: release-notes.md
+          files: |
+            dist/*.tar.gz
+            dist/*.whl
+            dist/checksums.txt

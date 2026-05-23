@@ -3,7 +3,8 @@ import subprocess
 from pathlib import Path
 
 import psycopg2
-from _config.models import Config
+
+from pgmimic._config.models import Config
 
 
 def _file_for_table(files: list[str], table: str) -> str:

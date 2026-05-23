@@ -1,6 +1,6 @@
 import json
 
-from _config.models import Config
+from pgmimic._config.models import Config
 
 
 class ConfigHandler:

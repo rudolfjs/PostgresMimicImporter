@@ -12,7 +12,7 @@ def chdir_tmp(tmp_path, monkeypatch):
 
 
 def test_data_handler_exposes_package_relative_sql_dir(chdir_tmp):
-    from _db._db_handler import DataHandler
+    from pgmimic._db._db_handler import DataHandler
 
     sql_dir = DataHandler.SQL_DIR
     assert sql_dir.is_dir(), f"SQL_DIR {sql_dir} should be a real directory"
@@ -32,14 +32,14 @@ def test_data_handler_exposes_package_relative_sql_dir(chdir_tmp):
     ],
 )
 def test_known_sql_assets_resolve_independently_of_cwd(chdir_tmp, version, filename):
-    from _db._db_handler import DataHandler
+    from pgmimic._db._db_handler import DataHandler
 
     assert (DataHandler.SQL_DIR / version / filename).is_file()
 
 
 def test_3_1_create_includes_ed_schema():
     """3.1 create.sql must include the carried-forward ED schema + tables."""
-    from _db._db_handler import DataHandler
+    from pgmimic._db._db_handler import DataHandler
 
     create_sql = (DataHandler.SQL_DIR / "3.1" / "create.sql").read_text()
     assert "CREATE SCHEMA mimiciv_ed" in create_sql
@@ -49,7 +49,7 @@ def test_3_1_create_includes_ed_schema():
 
 def test_3_1_create_includes_new_hosp_tables():
     """3.1 introduces drgcodes, provider, services in mimiciv_hosp."""
-    from _db._db_handler import DataHandler
+    from pgmimic._db._db_handler import DataHandler
 
     create_sql = (DataHandler.SQL_DIR / "3.1" / "create.sql").read_text()
     for table in ("drgcodes", "provider", "services"):
@@ -58,7 +58,7 @@ def test_3_1_create_includes_new_hosp_tables():
 
 def test_3_1_create_includes_new_icu_table():
     """3.1 introduces caregiver in mimiciv_icu."""
-    from _db._db_handler import DataHandler
+    from pgmimic._db._db_handler import DataHandler
 
     create_sql = (DataHandler.SQL_DIR / "3.1" / "create.sql").read_text()
     assert "mimiciv_icu.caregiver" in create_sql

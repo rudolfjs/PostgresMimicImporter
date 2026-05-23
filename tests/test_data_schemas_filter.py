@@ -18,7 +18,7 @@ import pytest
 
 
 def _config(*, schemas: list[str], tables: dict) -> object:
-    from _config.models import Config
+    from pgmimic._config.models import Config
 
     return Config.model_validate(
         {
@@ -41,7 +41,7 @@ def _config(*, schemas: list[str], tables: dict) -> object:
 
 @pytest.fixture
 def fake_handler(monkeypatch):
-    from _db import _db_handler as db_mod
+    from pgmimic._db import _db_handler as db_mod
 
     mock_conn = MagicMock(name="conn")
     monkeypatch.setattr(db_mod.psycopg2, "connect", lambda **_: mock_conn)

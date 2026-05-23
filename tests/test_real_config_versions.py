@@ -10,7 +10,7 @@ def test_default_2_2_resolves_legacy(monkeypatch):
     """Shipped config.json with version=2.2 keeps the legacy mimic_* schemas."""
     monkeypatch.delenv("DB_USER", raising=False)
     monkeypatch.delenv("DB_PASSWORD", raising=False)
-    from _config._config_handler import ConfigHandler
+    from pgmimic._config._config_handler import ConfigHandler
 
     repo_root = pathlib.Path(__file__).parent.parent
     cfg = ConfigHandler(str(repo_root / "config.json")).get_config()
@@ -26,7 +26,7 @@ def test_3_1_opt_in_resolves_versions_map(tmp_path, monkeypatch):
     """Flipping version to 3.1 picks up versions[3.1] schemas."""
     monkeypatch.delenv("DB_USER", raising=False)
     monkeypatch.delenv("DB_PASSWORD", raising=False)
-    from _config._config_handler import ConfigHandler
+    from pgmimic._config._config_handler import ConfigHandler
 
     repo_root = pathlib.Path(__file__).parent.parent
     raw = json.loads((repo_root / "config.json").read_text())

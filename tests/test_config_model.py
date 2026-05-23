@@ -29,8 +29,9 @@ def minimal_config_dict() -> dict:
 def test_config_raises_on_missing_required_field(minimal_config_dict, monkeypatch):
     monkeypatch.delenv("DB_USER", raising=False)
     monkeypatch.delenv("DB_PASSWORD", raising=False)
-    from _config.models import Config
     from pydantic import ValidationError
+
+    from pgmimic._config.models import Config
 
     broken = dict(minimal_config_dict)
     broken["data"] = dict(broken["data"])
@@ -43,7 +44,7 @@ def test_config_raises_on_missing_required_field(minimal_config_dict, monkeypatc
 def test_config_exposes_dotted_access(minimal_config_dict, monkeypatch):
     monkeypatch.delenv("DB_USER", raising=False)
     monkeypatch.delenv("DB_PASSWORD", raising=False)
-    from _config.models import Config
+    from pgmimic._config.models import Config
 
     cfg = Config.model_validate(minimal_config_dict)
     assert cfg.database.host == "pg"
@@ -58,7 +59,7 @@ def test_config_exposes_dotted_access(minimal_config_dict, monkeypatch):
 def test_config_populates_credentials_from_env(minimal_config_dict, monkeypatch):
     monkeypatch.setenv("DB_USER", "alice")
     monkeypatch.setenv("DB_PASSWORD", "s3cret")
-    from _config.models import Config
+    from pgmimic._config.models import Config
 
     cfg = Config.model_validate(minimal_config_dict)
     assert cfg.database.username == "alice"
@@ -71,7 +72,7 @@ def test_config_empty_env_user_does_not_override(minimal_config_dict, monkeypatc
     would cause `psql -U ""` → `FATAL: role "" does not exist`."""
     monkeypatch.setenv("DB_USER", "")
     monkeypatch.setenv("DB_PASSWORD", "")
-    from _config.models import Config
+    from pgmimic._config.models import Config
 
     minimal_config_dict["database"]["username"] = "alice"
     minimal_config_dict["database"]["password"] = "secret"
@@ -84,7 +85,7 @@ def test_config_no_env_preserves_none(minimal_config_dict, monkeypatch):
     """When env vars are absent, credentials stay None (config default)."""
     monkeypatch.delenv("DB_USER", raising=False)
     monkeypatch.delenv("DB_PASSWORD", raising=False)
-    from _config.models import Config
+    from pgmimic._config.models import Config
 
     cfg = Config.model_validate(minimal_config_dict)
     assert cfg.database.username is None
@@ -94,8 +95,8 @@ def test_config_no_env_preserves_none(minimal_config_dict, monkeypatch):
 def test_config_handler_returns_model(tmp_path, minimal_config_dict, monkeypatch):
     monkeypatch.delenv("DB_USER", raising=False)
     monkeypatch.delenv("DB_PASSWORD", raising=False)
-    from _config._config_handler import ConfigHandler
-    from _config.models import Config
+    from pgmimic._config._config_handler import ConfigHandler
+    from pgmimic._config.models import Config
 
     cfg_file = tmp_path / "config.json"
     cfg_file.write_text(json.dumps(minimal_config_dict))
@@ -108,8 +109,9 @@ def test_config_handler_returns_model(tmp_path, minimal_config_dict, monkeypatch
 
 def test_config_handler_raises_on_bad_json(tmp_path):
     """Bad config no longer silently swallowed (loud failure)."""
-    from _config._config_handler import ConfigHandler
     from pydantic import ValidationError
+
+    from pgmimic._config._config_handler import ConfigHandler
 
     cfg_file = tmp_path / "config.json"
     cfg_file.write_text('{"database": "not a dict"}')
@@ -124,7 +126,7 @@ def test_real_config_json_loads(monkeypatch):
     monkeypatch.delenv("DB_PASSWORD", raising=False)
     import pathlib
 
-    from _config._config_handler import ConfigHandler
+    from pgmimic._config._config_handler import ConfigHandler
 
     repo_root = pathlib.Path(__file__).parent.parent
     cfg = ConfigHandler(str(repo_root / "config.json")).get_config()

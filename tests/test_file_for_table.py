@@ -12,7 +12,7 @@ import pytest
 
 
 def test_resolves_exact_basename():
-    from _db._db_handler import _file_for_table
+    from pgmimic._db._db_handler import _file_for_table
 
     files = ["/data/mimiciv/3.1/hosp/admissions.csv.gz"]
     assert _file_for_table(files, "admissions").endswith("admissions.csv.gz")
@@ -20,7 +20,7 @@ def test_resolves_exact_basename():
 
 def test_poe_does_not_match_poe_detail():
     """The original substring match would return `poe_detail.csv.gz` for table `poe`."""
-    from _db._db_handler import _file_for_table
+    from pgmimic._db._db_handler import _file_for_table
 
     files = [
         "/data/mimiciv/3.1/hosp/poe_detail.csv.gz",
@@ -32,7 +32,7 @@ def test_poe_does_not_match_poe_detail():
 
 def test_emar_does_not_match_emar_detail():
     """Same shape, different prefix — emar / emar_detail."""
-    from _db._db_handler import _file_for_table
+    from pgmimic._db._db_handler import _file_for_table
 
     files = [
         "/data/mimiciv/3.1/hosp/emar_detail.csv.gz",
@@ -43,7 +43,7 @@ def test_emar_does_not_match_emar_detail():
 
 
 def test_raises_on_missing():
-    from _db._db_handler import _file_for_table
+    from pgmimic._db._db_handler import _file_for_table
 
     with pytest.raises(FileNotFoundError):
         _file_for_table(["/data/admissions.csv.gz"], "patients")
@@ -51,7 +51,7 @@ def test_raises_on_missing():
 
 def test_raises_on_duplicates():
     """Two files with the same basename in different subdirs should error, not pick blind."""
-    from _db._db_handler import _file_for_table
+    from pgmimic._db._db_handler import _file_for_table
 
     files = [
         "/data/mimiciv/3.1/hosp/admissions.csv.gz",

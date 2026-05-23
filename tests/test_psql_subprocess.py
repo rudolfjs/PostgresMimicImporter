@@ -15,7 +15,8 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 import pytest
-from _config.models import Config
+
+from pgmimic._config.models import Config
 
 
 def _make_config(password: str = "pw") -> Config:
@@ -41,7 +42,7 @@ def _make_config(password: str = "pw") -> Config:
 @pytest.fixture
 def fake_db(tmp_path, monkeypatch):
     """DataHandler with psycopg2.connect + subprocess.run mocked."""
-    from _db import _db_handler as db_mod
+    from pgmimic._db import _db_handler as db_mod
 
     mock_conn = MagicMock(name="conn")
     monkeypatch.setattr(db_mod.psycopg2, "connect", lambda **_: mock_conn)
@@ -130,7 +131,7 @@ def test_psql_omits_user_flag_when_username_is_none(tmp_path, monkeypatch):
     """When username is None, -U must be omitted so psql falls back to
     libpq defaults (PGUSER env or OS user). Passing `-U ""` causes
     `FATAL: role "" does not exist`."""
-    from _db import _db_handler as db_mod
+    from pgmimic._db import _db_handler as db_mod
 
     mock_conn = MagicMock(name="conn")
     monkeypatch.setattr(db_mod.psycopg2, "connect", lambda **_: mock_conn)
@@ -155,7 +156,7 @@ def test_psql_omits_user_flag_when_username_is_none(tmp_path, monkeypatch):
 
 def test_psql_sets_pguser_env_when_username_is_set(tmp_path, monkeypatch):
     """When username is set, pass it via PGUSER env (mirrors PGPASSWORD pattern)."""
-    from _db import _db_handler as db_mod
+    from pgmimic._db import _db_handler as db_mod
 
     mock_conn = MagicMock(name="conn")
     monkeypatch.setattr(db_mod.psycopg2, "connect", lambda **_: mock_conn)

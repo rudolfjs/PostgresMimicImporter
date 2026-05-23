@@ -12,12 +12,13 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 import pytest
-from _config.models import Config
+
+from pgmimic._config.models import Config
 
 
 def _make_config(version: str) -> Config:
     """Build a Config model with a placeholder DB section (never actually dialled)."""
-    from _config.models import Config
+    from pgmimic._config.models import Config
 
     return Config.model_validate(
         {
@@ -45,7 +46,7 @@ def fake_db(tmp_path, monkeypatch):
     Yields (handler, mock_conn, mock_cursor). Writes to tmp_path/<version>/<file>.sql
     are the SQL the handler will execute.
     """
-    from _db import _db_handler as db_mod
+    from pgmimic._db import _db_handler as db_mod
 
     mock_cursor = MagicMock(name="cursor")
     mock_conn = MagicMock(name="conn")
