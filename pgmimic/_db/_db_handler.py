@@ -87,34 +87,39 @@ class DataHandler:
 
         return exists
 
-    def _run_sql_file_via_split(self, filename: str) -> None:
-        """Execute every non-empty `;`-separated statement in a versioned SQL file.
+    def _run_sql_file(self, filename: str) -> None:
+        """Execute a whole versioned SQL file in one server round-trip.
 
-        On any error: rollback the transaction and re-raise. The previous
-        implementation caught `Exception`, printed `repr(e)`, and carried on —
-        leaving a half-populated database that the next run skipped because
-        `_check_data` saw the partial tables as "data already imported".
+        The previous implementation split on `;` and looped — but a
+        `sql.split(";")` cuts straight through `/* ... ; ... */` block
+        comments, dollar-quoted blocks, and single-quoted strings, feeding
+        the server malformed statements. Postgres' own parser handles these
+        correctly; pass the whole file in one `execute()` call and let the
+        server do the parsing.
+
+        On any error: rollback and re-raise. Loud failure beats silent
+        partial import (the prior swallow-and-print behaviour left
+        half-populated tables that the next run skipped because
+        `_check_data` saw them as "already imported").
         """
         sql_path = self.SQL_DIR / self.config.data.version / filename
         sql = sql_path.read_text()
         try:
             with self.conn.cursor() as cur:
-                for statement in sql.split(";"):
-                    if statement.strip():
-                        cur.execute(statement)
+                cur.execute(sql)
             self.conn.commit()
         except Exception:
             self.conn.rollback()
             raise
 
     def _create_constraint(self) -> None:
-        self._run_sql_file_via_split("constraint.sql")
+        self._run_sql_file("constraint.sql")
 
     def _create_index(self) -> None:
-        self._run_sql_file_via_split("index.sql")
+        self._run_sql_file("index.sql")
 
     def _create_tables(self) -> None:
-        self._run_sql_file_via_split("create.sql")
+        self._run_sql_file("create.sql")
 
     def _psql_args(self, command: str) -> list[str]:
         """Build the psql argv list. Credentials go via env, not the URL."""

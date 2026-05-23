@@ -115,14 +115,44 @@ def test_create_constraint_uses_same_helper(fake_db):
     mock_conn.rollback.assert_called()
 
 
-def test_empty_statements_are_skipped(fake_db):
-    """A SQL file with trailing semicolons / whitespace doesn't trip the executor."""
+def test_create_tables_passes_full_file_in_single_execute(fake_db):
+    """The entire SQL file is sent to the server in one `cur.execute()` call.
+
+    We delegate statement parsing (and skipping of `;;` empties) to the postgres
+    server, which has a robust SQL grammar — unlike a `sql.split(";")` loop which
+    mishandles strings, comments, and dollar-quoted blocks.
+    """
     handler, mock_conn, mock_cursor, version_dir = fake_db
-    (version_dir / "create.sql").write_text("CREATE TABLE t (id int);\n\n  ;\n")
+    sql = "CREATE TABLE t (id int);\n\n  ;\n"
+    (version_dir / "create.sql").write_text(sql)
 
     handler._create_tables()
 
-    # Two `CREATE TABLE` statements would've been called; only the non-empty one runs
-    executed = [c.args[0].strip() for c in mock_cursor.execute.call_args_list]
-    assert any("CREATE TABLE t" in s for s in executed)
-    assert all(s for s in executed)  # no empty statements
+    assert mock_cursor.execute.call_count == 1
+    assert mock_cursor.execute.call_args.args[0] == sql
+    mock_conn.commit.assert_called_once()
+
+
+def test_create_tables_does_not_split_on_semicolons_inside_block_comments(fake_db):
+    """Multi-line `/* ... ; ... */` block comments must reach the server intact.
+
+    Regression test for the bug surfaced by the first real-data e2e run: the
+    MIMIC-IV-ED appendage in `pgmimic/_db/SQL/3.1/create.sql` has a block
+    comment containing a `;` ("...to a 3.1 release;"). The previous
+    split-on-`;` implementation cut the comment in half, feeding postgres
+    an unterminated `/*` and raising `psycopg2.errors.SyntaxError`.
+    """
+    handler, _conn, mock_cursor, version_dir = fake_db
+    sql = (
+        "/*\n"
+        " * Header note;\n"
+        " * second line with another; semicolon\n"
+        " */\n"
+        "CREATE TABLE t (id int);\n"
+    )
+    (version_dir / "create.sql").write_text(sql)
+
+    handler._create_tables()
+
+    assert mock_cursor.execute.call_count == 1
+    assert mock_cursor.execute.call_args.args[0] == sql
