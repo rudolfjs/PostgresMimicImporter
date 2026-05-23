@@ -1,6 +1,6 @@
-from _config._config_handler import ConfigHandler
-from _db._db_handler import DataHandler
-from _files._file_handler import FileHandler
+from pgmimic._config._config_handler import ConfigHandler
+from pgmimic._db._db_handler import DataHandler
+from pgmimic._files._file_handler import FileHandler
 
 
 class MimicImporter:
@@ -36,12 +36,10 @@ class MimicImporter:
             self._file_handler = FileHandler()
             try:
                 self.file_path = self._file_handler.path(
-                    f"{self.config['data']['location']}/{self.config['data']['version']}"
+                    f"{self.config.data.location}/{self.config.data.version}"
                 )
             except Exception as e:
-                print(
-                    f"FATAL: Error finding files in path. Error Message: {repr(e)}"
-                )
+                print(f"FATAL: Error finding files in path. Error Message: {repr(e)}")
             files = self._file_handler.files()
             # import data
             self._db_handler._write_mimic_data(files)

@@ -1,20 +1,13 @@
 import json
-import os
+
+from pgmimic._config.models import Config
 
 
 class ConfigHandler:
     def __init__(self, location: str) -> None:
-        self.config: dict = {}
-        try:
-            with open(location) as config_file:
-                self.config = json.load(config_file)
-                # add ENVS
-                self.config["database"]["username"] = os.getenv("DB_USER")
-                self.config["database"]["password"] = os.getenv("DB_PASSWORD")
-                config_file.close()
-        except Exception as e:
-            print(repr(e))
-        return None
+        with open(location) as config_file:
+            raw = json.load(config_file)
+        self.config: Config = Config.model_validate(raw)
 
-    def get_config(self) -> dict:
+    def get_config(self) -> Config:
         return self.config

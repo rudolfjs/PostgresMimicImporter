@@ -1,0 +1,3 @@
+kind: Fixed
+body: '`_create_tables` / `_create_index` / `_create_constraint` no longer split SQL files on `;` before sending them to the server. The previous `sql.split(";")` cut through `/* ... ; ... */` block comments (such as the MIMIC-IV-ED appendage in `pgmimic/_db/SQL/3.1/create.sql`), dollar-quoted blocks, and single-quoted strings — feeding postgres unterminated comments and triggering `psycopg2.errors.SyntaxError`. The new `_run_sql_file` helper passes the whole file in one `cur.execute()` call and lets postgres'' own SQL grammar handle statement boundaries, comments, and quoting. Surfaced by the first real-data e2e run.'
+time: 2026-05-23T12:20:00.000000000+10:00

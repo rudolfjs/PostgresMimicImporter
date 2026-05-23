@@ -1,4 +1,4 @@
-from importer.mimic_importer import MimicImporter
+from pgmimic.importer.mimic_importer import MimicImporter
 
 
 def main():

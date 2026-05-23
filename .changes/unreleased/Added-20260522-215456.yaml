@@ -1,0 +1,3 @@
+kind: Added
+body: 'MIMIC-IV 3.1 SQL assets — `pgmimic/_db/SQL/3.1/{create,constraint,index,postgres-functions}.sql` copied from upstream MIT-LCP/mimic-code with MIMIC-IV-ED 2.2 DDL appended to `create.sql` (ED has not moved to 3.1; ships separately). Provenance README records upstream paths and SHA256s for future drift detection.'
+time: 2026-05-22T21:54:56.000000000+10:00

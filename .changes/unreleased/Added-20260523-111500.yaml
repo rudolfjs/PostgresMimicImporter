@@ -1,0 +1,3 @@
+kind: Added
+body: '`PGMIMIC_HOST_PORT` env var lets the compose stack publish on a host port other than 5432 (default unchanged). Useful when running `pixi run -e dev e2e` on a host that already has a postgres bound to 5432: `PGMIMIC_HOST_PORT=5433 pixi run -e dev e2e` makes compose publish on 5433 and the e2e validate step connect via the same port. Container-side port stays 5432, so nothing about the in-network `pg` hostname changes.'
+time: 2026-05-23T11:15:00.000000000+10:00
