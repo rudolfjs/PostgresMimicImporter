@@ -12,7 +12,7 @@ def chdir_tmp(tmp_path, monkeypatch):
 
 
 def test_data_handler_exposes_package_relative_sql_dir(chdir_tmp):
-    from _db._db_handler import DataHandler
+    from pgmimic._db._db_handler import DataHandler
 
     sql_dir = DataHandler.SQL_DIR
     assert sql_dir.is_dir(), f"SQL_DIR {sql_dir} should be a real directory"
@@ -28,6 +28,6 @@ def test_data_handler_exposes_package_relative_sql_dir(chdir_tmp):
     ],
 )
 def test_known_sql_assets_resolve_independently_of_cwd(chdir_tmp, version, filename):
-    from _db._db_handler import DataHandler
+    from pgmimic._db._db_handler import DataHandler
 
     assert (DataHandler.SQL_DIR / version / filename).is_file()
