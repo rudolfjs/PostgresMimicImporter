@@ -48,7 +48,9 @@ The workflow authenticates as a dedicated GitHub App to push the changelog commi
 
 ### Cutting a release
 
-1. Add changie fragments for everything new since the last release: `pixi run -e dev changie new` (or run `changie new` directly if you have it on `PATH`). Commit them.
+[changie](https://changie.dev) is not bundled with pixi (it ships as a single Go binary, not a conda package). Install it once via `brew install changie`, a downloaded release binary, or the [install instructions](https://changie.dev/guide/installation/) — the CI workflow installs its own copy, so this is only needed locally.
+
+1. Add changie fragments for everything new since the last release: `changie new`. Commit them.
 2. Bump `version` in `pyproject.toml` to the target version. Commit.
 3. Tag and push: `git tag v<VERSION> && git push origin v<VERSION>`.
 4. The release workflow will:
