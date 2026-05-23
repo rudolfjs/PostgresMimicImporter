@@ -172,6 +172,10 @@ credentials. Run it on a host that has the data on disk:
 ```bash
 export MIMIC_DATA_PATH=/absolute/path/to/mimic/data
 pixi run -e dev e2e
+
+# If 5432 is already occupied by another local postgres, override the
+# host-side port; both compose and the e2e validate step read this:
+PGMIMIC_HOST_PORT=5433 pixi run -e dev e2e
 ```
 
 The task brings up the Postgres compose service, runs the importer **inside**

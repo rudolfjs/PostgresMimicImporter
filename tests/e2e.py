@@ -17,13 +17,14 @@ What it does:
      cannot). `--build` rebuilds the image when the Dockerfile or
      pixi manifest changes; `.dockerignore` keeps `data/` out of the
      build context.
-  5. Connects to localhost:5432 via psycopg2 (postgres' published
-     port) using the same `POSTGRES_USER`/`POSTGRES_PASSWORD`/
-     `POSTGRES_DB` values compose substitutes into the `pg` container
-     (read from `.env` if the shell hasn't exported them, matching
-     compose's own behaviour), and runs `mimiciv3.1/buildmimic/
-     validate.sql`. Reports per table; exits non-zero on any FAILED
-     row.
+  5. Connects to localhost on the host port published by compose
+     (`PGMIMIC_HOST_PORT`, default 5432; override for a host where
+     5432 is already taken) via psycopg2, using the same
+     `POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB` values compose
+     substitutes into the `pg` container (read from `.env` if the
+     shell hasn't exported them, matching compose's own behaviour),
+     and runs `mimiciv3.1/buildmimic/validate.sql`. Reports per
+     table; exits non-zero on any FAILED row.
 
 The container is left running by default (so you can poke around).
 Pass `--teardown` to bring it back down.
@@ -129,7 +130,7 @@ def _run_validate_sql() -> int:
     env = _dotenv_defaults()
     conn = psycopg2.connect(
         host="localhost",
-        port=5432,
+        port=int(os.getenv("PGMIMIC_HOST_PORT", env.get("PGMIMIC_HOST_PORT", "5432"))),
         dbname=os.getenv("POSTGRES_DB", env.get("POSTGRES_DB", "postgres")),
         user=os.getenv("POSTGRES_USER", env.get("POSTGRES_USER", "postgres")),
         password=os.getenv("POSTGRES_PASSWORD", env.get("POSTGRES_PASSWORD", "")),

@@ -13,7 +13,10 @@ services:
         max-size: 10m
         max-file: "3"
     ports:
-      - "5432:5432"
+      # Host-side port is configurable so the compose stack can coexist with
+      # another postgres on 5432 (e.g. during `pixi run -e dev e2e` on a dev
+      # host that already runs an unrelated DB). Container port is fixed.
+      - "${PGMIMIC_HOST_PORT:-5432}:5432"
     volumes:
       - db-data:/var/lib/postgresql/data/
     healthcheck:
