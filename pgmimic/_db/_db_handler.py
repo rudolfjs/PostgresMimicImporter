@@ -103,7 +103,7 @@ class DataHandler:
                     print(f"FATAL: Error creating tables. {repr(e)}")
                 curr.close()
         return None
-    
+
     def _create_tables(self):
         curr = self.conn.cursor()
         sql_path = self.SQL_DIR / self.config["data"]["version"] / "create.sql"
@@ -126,27 +126,25 @@ class DataHandler:
                     print(f"FATAL: Error creating tables. {repr(e)}")
                 curr.close()
         return None
-    
+
     def _create_postgres_functions(self):
         sql_path = self.SQL_DIR / self.config["data"]["version"] / "postgres-functions.sql"
         psql_template = 'psql "postgresql://{}:{}@{}:{}/{}" --command "{}"'
         command = f"\\i {sql_path}"
         bash_command = psql_template.format(
-                    self.config["database"]["username"],
-                    self.config["database"]["password"],
-                    self.config["database"]["host"],
-                    self.config["database"]["port"],
-                    self.config["database"]["database"],
-                    command.strip()
-                )
-        print(bash_command)
-        process = subprocess.Popen(
-            bash_command, stdout=subprocess.PIPE, shell=True
+            self.config["database"]["username"],
+            self.config["database"]["password"],
+            self.config["database"]["host"],
+            self.config["database"]["port"],
+            self.config["database"]["database"],
+            command.strip(),
         )
+        print(bash_command)
+        process = subprocess.Popen(bash_command, stdout=subprocess.PIPE, shell=True)
         output, error = process.communicate()
         print(output)
         return None
-    
+
     def _write_mimic_data(self, files: list[str]) -> None:
         # TODO - need to progress here
         psql_template = 'psql "postgresql://{}:{}@{}:{}/{}" --command "{}"'
@@ -170,9 +168,7 @@ class DataHandler:
                         command.strip(),
                     )
                     print(bash_command)
-                    process = subprocess.Popen(
-                        bash_command, stdout=subprocess.PIPE, shell=True
-                    )
+                    process = subprocess.Popen(bash_command, stdout=subprocess.PIPE, shell=True)
                     output, error = process.communicate()
                     print(output)
 
