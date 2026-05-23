@@ -8,6 +8,7 @@ requires-python = ">= 3.10"
 version = "0.0.4"
 
 dependencies = [
+    "pydantic>=2",
     "psycopg2-binary>=2.9,<3",
 ]
 
@@ -34,6 +35,7 @@ platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
 [tool.pixi.dependencies]
 python = "3.10.*"
 psycopg2 = "2.9.*"
+pydantic = ">=2"
 
 [tool.pixi.feature.lint.dependencies]
 ruff = ">=0.15"
@@ -50,7 +52,7 @@ hatchling = ">=1.25"
 
 [tool.pixi.environments]
 default = {solve-group = "default"}
-dev = {features = ["lint", "test", "types"], solve-group = "default"}
+dev = {features = ["lint", "test", "types", "dev"], solve-group = "default"}
 lint = {features = ["lint"], solve-group = "default"}
 test = {features = ["test"], solve-group = "default"}
 types = {features = ["types"], solve-group = "default"}
@@ -66,12 +68,23 @@ check-format = {cmd = "ruff format --check .", description = "Check formatting w
 
 [tool.pixi.feature.test.tasks]
 test = {cmd = "pytest", description = "Run the pytest suite"}
+validate-fixtures = {cmd = "python -m tests.fixtures.validate", description = "Pandera-validate synthetic CSV fixtures"}
+generate-fixtures = {cmd = "python -m tests.fixtures.generate", description = "Regenerate synthetic CSV fixtures (run when schemas change)"}
+e2e = {cmd = "python -m tests.e2e", description = "Opt-in: import real MIMIC-IV data into a containerised postgres + run upstream validate.sql (needs MIMIC_DATA_PATH)"}
 
 [tool.pixi.feature.types.tasks]
 typecheck = {cmd = "ty check", description = "Type-check with ty"}
 
 [tool.pixi.feature.release.tasks]
 build-dist = {cmd = "python -m build --no-isolation --sdist --wheel --outdir dist", description = "Build sdist + wheel into ./dist (uses pixi-pinned hatchling, no PyPI fetch)"}
+
+[tool.pixi.feature.dev.dependencies]
+lefthook = "*"
+pandera = ">=0.20"
+pandas = ">=2"
+
+[tool.pixi.feature.dev.tasks]
+install-hooks = {cmd = "lefthook install", description = "Install lefthook git hooks (one-time per clone)"}
 
 [tool.ruff]
 line-length = 100

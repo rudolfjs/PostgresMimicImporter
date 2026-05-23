@@ -9,6 +9,7 @@ import pytest
 MODULES = [
     "pgmimic.main",
     "pgmimic._config._config_handler",
+    "pgmimic._config.models",
     "pgmimic._db._db_handler",
     "pgmimic._files._file_handler",
     "pgmimic.importer.mimic_importer",

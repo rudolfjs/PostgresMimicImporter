@@ -1,0 +1,3 @@
+kind: Fixed
+body: '`_create_tables`, `_create_index`, `_create_constraint` now surface SQL errors. The previous implementation caught every `Exception` from `cursor.execute()`, printed `repr(e)`, and continued — leaving a half-populated database and a misleading "MIMIC import completed" message. On failure: the connection rolls back and the exception propagates. All three methods now share a single `_run_sql_file_via_split` helper.'
+time: 2026-05-22T21:59:26.000000000+10:00

@@ -1,0 +1,49 @@
+# Keep the build context small. The Dockerfile only COPYs
+# `pyproject.toml`, `pixi.lock`, and `pgmimic/` — everything else here
+# is excluded so a `<runtime> build` (and especially the `--build` in
+# `pixi run -e dev e2e`) does not ship hundreds of GB of real MIMIC
+# data, the upstream `mimiciv3.1/` snapshot, or git/pixi caches to
+# the daemon.
+
+# Real MIMIC data (gitignored already; mirrored here so `--build` is
+# fast on hosts that have the dataset on disk under data/).
+data/
+
+# Git internals
+.git/
+.gitignore
+.gitattributes
+
+# Pixi local cache (can be many GB on contributor machines)
+.pixi/
+
+# Worktrees, direnv, devcontainer-only assets
+.worktrees/
+.direnv/
+.envrc
+.envrc.local
+.devcontainer/
+
+# Tests and fixtures are not needed inside the production image
+tests/
+
+# Upstream MIMIC-IV 3.1 snapshot (concepts + buildmimic SQL). The
+# importer reads from pgmimic/_db/SQL/ which is already COPYed.
+mimiciv3.1/
+
+# Design docs, changelog fragments, GitHub metadata, README
+docs/
+.changes/
+.github/
+*.md
+
+# Local env file — never bake creds into a build context
+.env
+.env.local
+
+# Python build/cache artefacts
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.ty_cache/

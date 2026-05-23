@@ -1,0 +1,3 @@
+kind: Changed
+body: '`ConfigHandler` now returns a Pydantic `Config` model instead of a raw dict — bad `config.json` raises `pydantic.ValidationError` loudly instead of being silently swallowed and printed. Callers in `_db_handler` and `mimic_importer` migrate to dotted attribute access (e.g. `config.database.host`).'
+time: 2026-05-22T18:45:35.000000000+10:00
