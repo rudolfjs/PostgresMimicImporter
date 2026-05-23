@@ -1,0 +1,3 @@
+kind: Added
+body: Lefthook pre-push git hooks via `pixi run -e dev install-hooks` — runs `lint`, `check-format`, `typecheck`, `test` in parallel before each push so contributors get the same gates CI enforces. Lefthook itself ships in the dev pixi env.
+time: 2026-05-22T13:24:50.000000000+10:00

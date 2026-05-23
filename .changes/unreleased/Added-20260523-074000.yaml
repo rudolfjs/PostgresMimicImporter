@@ -1,0 +1,3 @@
+kind: Added
+body: 'README compatibility table now lists MIMIC-IV 3.1 (with MIMIC-IV-ED 2.2 shipped alongside), plus a callout for the upstream schema rename from `mimic_*` to `mimiciv_*` in 3.1. New README subsections document the pre-push lefthook setup (pointing to CONTRIBUTING.md as the source of truth) and the opt-in `pixi run -e dev e2e` maintainer gate. CONTRIBUTING.md PR Guidelines now mirror the CI matrix verbatim (`lint check-format typecheck test validate-fixtures`) and reference `pixi run -e dev e2e` for importer / SQL-asset changes.'
+time: 2026-05-23T07:40:00.000000000+10:00

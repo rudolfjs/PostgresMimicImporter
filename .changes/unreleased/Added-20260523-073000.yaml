@@ -1,0 +1,3 @@
+kind: Added
+body: 'Opt-in `pixi run -e dev e2e` task — brings up the postgres compose service, runs `pixi run mimic-import` against `MIMIC_DATA_PATH`, then executes upstream `mimiciv3.1/buildmimic/validate.sql` via psycopg2 and reports per-table row-count mismatches. Not in CI (real MIMIC data lives behind PhysioNet credentials); designed as the maintainer''s pre-merge gate codified in `tests/e2e.py`. `--teardown` drops the container after the run; `--skip-import` re-validates against an already-loaded DB.'
+time: 2026-05-23T07:30:00.000000000+10:00
