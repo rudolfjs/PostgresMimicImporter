@@ -44,6 +44,7 @@ check-format = {cmd = "ruff format --check .", description = "Check formatting w
 test = {cmd = "pytest", description = "Run the pytest suite"}
 validate-fixtures = {cmd = "python -m tests.fixtures.validate", description = "Pandera-validate synthetic CSV fixtures"}
 generate-fixtures = {cmd = "python -m tests.fixtures.generate", description = "Regenerate synthetic CSV fixtures (run when schemas change)"}
+e2e = {cmd = "python -m tests.e2e", description = "Opt-in: import real MIMIC-IV data into a containerised postgres + run upstream validate.sql (needs MIMIC_DATA_PATH)"}
 
 [tool.pixi.feature.types.tasks]
 typecheck = {cmd = "ty check", description = "Type-check with ty"}
