@@ -24,7 +24,7 @@ After cloning, run once:
 pixi run -e dev install-hooks
 ```
 
-This installs [lefthook](https://lefthook.dev) git hooks. On `git push` they run the same fast suite CI runs (`lint`, `check-format`, `typecheck`, `test`) in parallel. Bypass an individual push with `git push --no-verify` — use sparingly.
+This installs [lefthook](https://lefthook.dev) git hooks. On `git push` they run the same fast suite CI runs (`lint`, `check-format`, `typecheck`, `test`, `validate-fixtures`) in parallel. Bypass an individual push with `git push --no-verify` — use sparingly.
 
 `lefthook install` bakes the absolute path of the dev-env lefthook binary into `.git/hooks/pre-push`, so pushes work without `pixi shell` active. If you rebuild the pixi env (e.g. wipe `.pixi/` or change platforms), re-run `pixi run -e dev install-hooks` so the embedded path stays valid.
 
@@ -34,8 +34,16 @@ When [submitting a pull request](https://github.com/rudolfjs/PostgresMimicImport
 
 1. You clearly describe the problem you're solving or the feature you're adding, linking to [issue](https://github.com/rudolfjs/PostgresMimicImporter/issues).
 2. You outline the changes you've made in detail.
-3. Please make sure your code is linted and formatted using [ruff](https://docs.astral.sh/ruff/) — run `pixi run -e dev lint` and `pixi run -e dev format` before pushing
-4. Please ensure `pixi run -e dev test` and `pixi run -e dev typecheck` (powered by [ty](https://docs.astral.sh/ty/)) pass on your branch
+3. You run the same gates CI runs before pushing:
+   `pixi run -e dev lint check-format typecheck test validate-fixtures`.
+   These cover [ruff](https://docs.astral.sh/ruff/) lint + format-check,
+   [ty](https://docs.astral.sh/ty/) type-check, the `pytest` suite, and
+   [Pandera](https://pandera.readthedocs.io)-based fixture validation. If you
+   ran `pixi run -e dev install-hooks` they fire automatically on `git push`.
+4. If your change touches the importer or SQL assets, also run
+   `pixi run -e dev e2e` on a host that has real MIMIC-IV data and confirm the
+   upstream `validate.sql` reports no row-count mismatches — this is the
+   middle checkbox in the PR template.
 
 ## Review Process
 

@@ -1,0 +1,3 @@
+kind: Added
+body: 'GitHub pull-request template at `.github/pull_request_template.md`. Reminds contributors to run the five CI gates (`lint check-format typecheck test validate-fixtures`), to run `pixi run -e dev e2e` against real MIMIC data when touching the importer or SQL assets, and to add a changie entry for user-facing changes.'
+time: 2026-05-23T07:35:00.000000000+10:00
