@@ -11,11 +11,12 @@ What it does:
   2. Picks `podman-compose` if available, else `docker compose`.
   3. Brings up the `pg` service from `docker-compose.yaml` and polls
      until `pg_isready`.
-  4. Invokes the existing `pixi run -e default mimic-import` entry
-     point against the real data path.
-  5. Connects via psycopg2 and runs the upstream
-     `mimiciv3.1/buildmimic/validate.sql` row-count check. Reports per
-     table; exits non-zero on any expected-vs-actual mismatch.
+  4. Runs the importer via `<runtime> run --rm mimic_import` so the
+     container has the `MIMIC_DATA_PATH` bind-mount and can reach the
+     `pg` hostname on the compose network (the host shell cannot).
+  5. Connects to localhost:5432 via psycopg2 (postgres' published
+     port) and runs `mimiciv3.1/buildmimic/validate.sql`. Reports per
+     table; exits non-zero on any FAILED row.
 
 The container is left running by default (so you can poke around).
 Pass `--teardown` to bring it back down.
@@ -111,8 +112,8 @@ def _run_validate_sql() -> int:
         conn.close()
 
     mismatches = 0
-    for tbl, expected, actual in rows:
-        ok = expected == actual
+    for tbl, expected, actual, check in rows:
+        ok = check == "PASSED"
         status = "ok " if ok else "FAIL"
         print(f"  {status}  {tbl:<25} expected={expected:>12} actual={actual:>12}")
         if not ok:
@@ -145,8 +146,12 @@ def main() -> int:
     print("pg is ready.")
 
     if not args.skip_import:
-        print("running mimic-import...")
-        subprocess.run(["pixi", "run", "-e", "default", "mimic-import"], check=True, cwd=REPO_ROOT)
+        print("running mimic-import inside the compose network...")
+        subprocess.run(
+            [*runtime, "run", "--rm", "--build", "mimic_import"],
+            check=True,
+            cwd=REPO_ROOT,
+        )
 
     print("\nvalidating row counts against upstream expected values...\n")
     mismatches = _run_validate_sql()
